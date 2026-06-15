@@ -8,9 +8,14 @@ import io.github.tusharnagdive.codekit.kitcollection.utils.UniChainUtils;
 @KitComponent(singleton = false)
 public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
 
-    private UniNode<T> head;
+    public UniNode<T> head;
 
     public UniChainImpl() {
+    }
+
+    @Override
+    public UniNode<T> getHead() {
+        return this.head;
     }
 
     @Override
@@ -26,7 +31,7 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
 
     @Override
     public void uniChainPrint() {
-        UniNode current = head;
+        UniNode<T> current = head;
         while (current != null) {
             System.out.print("("+current.data+")" + " --> ");
             current = current.next;
@@ -37,7 +42,7 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
     @Override
     public void addAtFirst(T data) {
         /*Step 1: Create the new Node*/
-        UniNode<T> newNode = new UniNode<T>(data);
+        UniNode<T> newNode = new UniNode<>(data);
         // Step 2: Point the new node's 'next' to the current head
         newNode.next = head;
         // Step 3: Shift the official 'head' reference to the new node
@@ -47,7 +52,7 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
     @Override
     public void addAtLast(T data) {
         // Step 1: Create the new node
-        UniNode<T> newNode = new UniNode<T>(data);
+        UniNode<T> newNode = new UniNode<>(data);
 
         // Step 2: Handle the edge case (Empty List)
         if(this.head == null){
@@ -79,7 +84,7 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
                 isPresent = true;
 
                 // Only create the node when we know we need it
-                UniNode<T> newNode = new UniNode<T>(data);
+                UniNode<T> newNode = new UniNode<>(data);
 
                 // Swap pointers
                 newNode.next = current.next;
@@ -123,7 +128,7 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
             if (current.next.data.equals(value)) {
                 isPresent = true;
 
-                UniNode<T> newNode = new UniNode<T>(data);
+                UniNode<T> newNode = new UniNode<>(data);
 
                 // Step A: Point new node to the target
                 newNode.next = current.next;
@@ -166,7 +171,7 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
         while (current != null) {
             // Look one step ahead
             if ((index + 1) == targetIndex) {
-                UniNode<T> newNode = new UniNode<T>(value);
+                UniNode<T> newNode = new UniNode<>(value);
 
                 // Pointer surgery
                 newNode.next = current.next;
@@ -179,7 +184,7 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
         }
 
         // 4. Out of Bounds Fallback
-        // If the loop finishes and we get here, the targetIndex was too large.
+        // If the loop finishes, and we get here, the targetIndex was too large.
         System.out.println("Error: Target index " + targetIndex + " is out of bounds.");
     }
 
@@ -394,7 +399,7 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
         if (head == null) {
             throw new IllegalArgumentException("SL List is empty");
         }
-        // Setup our placeholders before we start walking
+        // Set up our placeholders before we start walking
         UniNode<T> current = head;      // We start holding the very first node
         UniNode<T> prev = null;         // There is no "previous" node yet
         UniNode<T> next = null;         // A placeholder for our safety save
@@ -443,5 +448,25 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
     @Override
     public void enhancedSort() {
         UniChainUtils.mergeSort(head);
+    }
+
+    @Override
+    public void concatenate(UniChain<T> uniChain) {
+        // Edge Case 1: If the second list is empty or null, do nothing
+        if(uniChain == null || uniChain.getHead() == null) {
+            return;
+        }
+        // Edge Case 2: If the first list is empty, point its head to the second list
+        if(this.head == null) {
+            this.head = uniChain.getHead();
+            return;
+        }
+        // Standard Case: Traverse to the last node of the first list
+        UniNode<T> current = head;
+        while (current.next != null) {
+            current = current.next;
+        }
+        // Link the tail of the first list to the head of the second list
+        current.next = uniChain.getHead();
     }
 }

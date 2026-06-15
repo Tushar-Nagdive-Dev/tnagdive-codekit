@@ -1,7 +1,11 @@
 package io.github.tusharnagdive.codekit.kitcollection.struct;
 
+import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
+
 public interface UniChain<T> {
     Integer length();
+
+    UniNode<T> getHead();
 
     void uniChainPrint();
 
@@ -40,4 +44,6 @@ public interface UniChain<T> {
     void cheapSort();
 
     void enhancedSort();
+
+    void concatenate(UniChain<T> uniChain);
 }
