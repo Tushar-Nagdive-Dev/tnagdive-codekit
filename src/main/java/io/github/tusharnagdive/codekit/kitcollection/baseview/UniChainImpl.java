@@ -469,4 +469,24 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
         // Link the tail of the first list to the head of the second list
         current.next = uniChain.getHead();
     }
+
+    @Override
+    public boolean isUniChainCircular() {
+        if(head == null || head.next == null) {
+            return false;
+        }
+
+        UniNode<T> slow = head;
+        UniNode<T> fast = head;
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+
+            if(slow == fast) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

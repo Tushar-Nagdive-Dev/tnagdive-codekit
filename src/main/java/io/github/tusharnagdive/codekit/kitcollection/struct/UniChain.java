@@ -46,4 +46,6 @@ public interface UniChain<T> {
     void enhancedSort();
 
     void concatenate(UniChain<T> uniChain);
+
+    boolean isUniChainCircular();
 }
