@@ -99,21 +99,34 @@ public class DIContext {
             java.io.File directory = new java.io.File(resource.getFile());
 
             if (directory.exists()) {
-                for (java.io.File file : directory.listFiles()) {
-                    if (file.getName().endsWith(".class")) {
-                        // Rebuild the fully qualified class name
-                        String className = basePackage + "." + file.getName().replace(".class", "");
-                        Class<?> clazz = Class.forName(className);
-
-                        // If it has our marker, instantiate and register it automatically!
-                        if (clazz.isAnnotationPresent(KitComponent.class)) {
-                            registerType(clazz);
-                        }
-                    }
-                }
+                // Call the new recursive helper method
+                findAndRegisterClasses(directory, basePackage);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to scan package: " + basePackage, e);
+        }
+    }
+
+    /**
+     * Helper method to recursively scan directories for .class files.
+     */
+    private void findAndRegisterClasses(java.io.File directory, String packageName) throws Exception {
+        java.io.File[] files = directory.listFiles();
+        if (files == null) return;
+
+        for (java.io.File file : files) {
+            if (file.isDirectory()) {
+                // If it's a sub-folder, dive into it recursively!
+                findAndRegisterClasses(file, packageName + "." + file.getName());
+            } else if (file.getName().endsWith(".class")) {
+                // If it's a class file, register it
+                String className = packageName + "." + file.getName().replace(".class", "");
+                Class<?> clazz = Class.forName(className);
+
+                if (clazz.isAnnotationPresent(KitComponent.class)) {
+                    registerType(clazz);
+                }
+            }
         }
     }
 }
