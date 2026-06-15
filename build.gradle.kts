@@ -35,6 +35,21 @@ publishing {
             pom {
                 name.set("Tnagdive CodeKit")
                 description.set("A modern, developer-focused Java utility toolkit.")
+                url.set("https://github.com/Tushar-Nagdive-Dev/tnagdive-codekit")
+
+                licenses {
+                    license {
+                        name.set("The MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("tusharnagdive")
+                        name.set("Tushar Nagdive")
+                    }
+                }
             }
         }
     }
