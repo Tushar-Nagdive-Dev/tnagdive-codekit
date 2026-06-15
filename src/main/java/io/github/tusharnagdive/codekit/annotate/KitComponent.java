@@ -11,4 +11,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface KitComponent {
+    /**
+     * True = Share one instance (Services)
+     * False = Create a new instance every time (Data Structures)
+     */
+    boolean singleton() default true;
 }

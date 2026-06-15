@@ -9,21 +9,22 @@ import java.util.Map;
 
 public class DIContext {
 
-    private final Map<Class<?>, Object> registry = new HashMap<>();
+    // 1. Stores active Singleton instances (Replaces the old 'registry')
+    private final Map<Class<?>, Object> singletons = new HashMap<>();
+
+    // 2. Stores the blueprints (Class definitions) for everything we find during the scan
+    private final Map<Class<?>, Class<?>> registeredClasses = new HashMap<>();
 
     /**
-     * Registers an object into the context so it can be injected elsewhere.
+     * Registers an already-instantiated object into the context as a Singleton.
      */
     public void register(Object instance) {
-        registry.put(instance.getClass(), instance);
+        singletons.put(instance.getClass(), instance);
+        registeredClasses.put(instance.getClass(), instance.getClass());
     }
 
     /**
      * Scans the target object for @Onwired and injects the matching dependencies.
-     *
-     *
-     * Scans the target object for @Onwired and injects the matching dependencies,
-     * including matching interfaces to their implementations.
      */
     public void wire(Object target) {
         Class<?> clazz = target.getClass();
@@ -51,36 +52,66 @@ public class DIContext {
     }
 
     /**
-     * Helper method to find a dependency that either matches exactly OR implements the requested interface.
+     * Helper method to find a dependency. Automatically handles Singletons vs. Prototypes.
      */
     private Object findDependency(Class<?> requestedType) {
-        // 1. Try an exact match first (it's faster)
-        if (registry.containsKey(requestedType)) {
-            return registry.get(requestedType);
-        }
+        Class<?> targetBlueprint = null;
 
-        // 2. If no exact match, loop through the registry to find an implementing class
-        for (Map.Entry<Class<?>, Object> entry : registry.entrySet()) {
-            // isAssignableFrom checks if entry.getKey() implements or extends requestedType
-            if (requestedType.isAssignableFrom(entry.getKey())) {
-                return entry.getValue();
+        // 1. Try to find the blueprint: exact match first
+        if (registeredClasses.containsKey(requestedType)) {
+            targetBlueprint = registeredClasses.get(requestedType);
+        } else {
+            // 2. If no exact match, loop through blueprints to find an implementing class
+            for (Class<?> blueprint : registeredClasses.keySet()) {
+                if (requestedType.isAssignableFrom(blueprint)) {
+                    targetBlueprint = blueprint;
+                    break;
+                }
             }
         }
 
-        return null; // Nothing found
+        // If we didn't find a matching blueprint, fail gracefully
+        if (targetBlueprint == null) {
+            return null;
+        }
+
+        // 3. Return the Singleton if one was already built and stored
+        if (singletons.containsKey(targetBlueprint)) {
+            return singletons.get(targetBlueprint);
+        }
+
+        // 4. If it's a known blueprint but NOT in the singletons map, it's a Prototype!
+        // We generate a brand new instance right here.
+        try {
+            return targetBlueprint.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to instantiate Prototype for: " + targetBlueprint.getName(), e);
+        }
     }
 
     /**
-     * Automatically creates an instance of a class and registers it.
+     * Reads the annotation to decide if it should be built now (Singleton) or later (Prototype).
      */
     public void registerType(Class<?> clazz) {
-        try {
-            // Automatically calls the default constructor: new MyClass()
-            Object instance = clazz.getDeclaredConstructor().newInstance();
-            register(instance);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to instantiate class: " + clazz.getName(), e);
+        KitComponent annotation = clazz.getAnnotation(KitComponent.class);
+
+        // If someone registers without an annotation, assume true to keep old services safe
+        boolean isSingleton = (annotation == null) || annotation.singleton();
+
+        // Always store the blueprint so findDependency knows it exists
+        registeredClasses.put(clazz, clazz);
+
+        // If it's a singleton, build it right now and store it forever in memory
+        if (isSingleton) {
+            try {
+                Object instance = clazz.getDeclaredConstructor().newInstance();
+                singletons.put(clazz, instance);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to instantiate Singleton class: " + clazz.getName(), e);
+            }
         }
+        // If it's a Prototype (singleton = false), we do nothing else here!
+        // We just wait for findDependency() to call .newInstance() when it's needed.
     }
 
     /**
@@ -96,10 +127,11 @@ public class DIContext {
                 throw new IllegalArgumentException("Package not found: " + basePackage);
             }
 
-            java.io.File directory = new java.io.File(resource.getFile());
+            // Using toURI() to protect against the "space in folder name" bug!
+            java.io.File directory = new java.io.File(resource.toURI());
 
             if (directory.exists()) {
-                // Call the new recursive helper method
+                // Call the recursive helper method
                 findAndRegisterClasses(directory, basePackage);
             }
         } catch (Exception e) {
