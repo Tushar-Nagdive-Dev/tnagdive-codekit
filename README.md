@@ -1,9 +1,3 @@
-This is an incredible milestone. Upgrading your `README.md` is the final step in officially releasing these enterprise-level features to the public.
-
-To make sure developers understand exactly how powerful **`tnagdive-codekit`** has become, I have updated your documentation to highlight the two massive upgrades we just built: **Prototype Scoping** and the **Built-in Utility Kit**. I also bumped the version number to `1.0.2` in the installation instructions to reflect your latest stable release.
-
-Here is your fully updated, professional `README.md` ready to be pushed to GitHub!
-
 ```markdown
 # 🧰 Tnagdive CodeKit
 
@@ -203,6 +197,92 @@ CodeKit.onWire(this, "com.myapp.core", "com.myapp.database");
 ```
 
 ---
+```markdown
+## ⚙️ Advanced Features (New in v1.0.2)
+
+### 1. Enterprise Scoping: Singletons vs. Prototypes
+By default, DI frameworks share the exact same object across your entire application (The Singleton Trap). If you are building stateful objects or data structures, you need a brand-new instance every time you inject it. 
+
+You can now explicitly tell CodeKit to generate a fresh instance on every `@Onwired` call by setting `singleton = false`:
+
+```java
+// Framework will generate a fresh instance everywhere it is injected!
+@KitComponent(singleton = false)
+public class TemporaryCache implements CacheManager { ... }
+
+```
+
+### 2. Built-in Utility Kit (Auto-Scanning)
+
+CodeKit is more than just an injector; it is a developer toolkit. CodeKit now silently auto-scans its own internal packages, giving you instant access to optimized utilities without any manual configuration.
+
+For example, you can instantly inject our built-in `UniChain` data structure:
+
+```java
+import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
+
+public class DataProcessor {
+    
+    // No setup required! CodeKit automatically provides this built-in Prototype tool.
+    @Onwired
+    private UniChain<Integer> numberChain;
+    
+    public DataProcessor() {
+        CodeKit.onWire(this);
+    }
+    
+    public void process() {
+        numberChain.addAtFirst(10);
+        numberChain.cheapSort();
+        numberChain.uniChainPrint();
+    }
+}
+
+```
+
+### 3. Optional Dependencies
+
+If a dependency is not strictly required for your class to function, you can prevent CodeKit from throwing a crash error by marking it as optional:
+
+```java
+@Onwired(required = false)
+private OptionalLogger optionalLogger; 
+
+```
+
+### 4. Custom Package Scanning
+
+By default, `CodeKit.onWire(this)` scans your toolkit and the package where the calling class lives. If your application has a complex structure and you need to scan specific external packages, use the overloaded method:
+
+```java
+// Scans the current package AND the specified database toolkit package
+CodeKit.onWire(this, "com.myapp.core", "com.myapp.database");
+
+```
+
+### 5. Programmatic Collection Factory (No Annotations Needed!)
+
+If you prefer not to use `@Onwired` to inject data structures, CodeKit provides a blazing-fast, static factory called `KitCollections`. This allows you to generate highly optimized, generic data structures on the fly inside any method.
+
+```java
+import io.github.tusharnagdive.codekit.kitcollection.KitCollections;
+import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
+
+public class AnalyticsEngine {
+    
+    public void trackHistory() {
+        // Generates a fresh instance instantly. No @Onwired required!
+        UniChain<String> historyChain = KitCollections.get(UniChain.class);
+        
+        historyChain.addAtFirst("User Login");
+        historyChain.addAtLast("User Logout");
+        historyChain.uniChainPrint();
+    }
+}
+
+```
+
+**The KitCollections Advantage:** The underlying implementations (like `UniChainImpl`) are completely hidden from the consumer to ensure clean architecture, and the factory uses target-type inference to guarantee type safety without throwing unchecked generic compilation warnings.
 
 ## 🤝 Contributing
 
@@ -212,6 +292,3 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 
 **License:** MIT
 
-```
-
-```
