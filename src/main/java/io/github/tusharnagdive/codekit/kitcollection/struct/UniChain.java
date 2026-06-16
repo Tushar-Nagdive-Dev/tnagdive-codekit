@@ -1,9 +1,15 @@
 package io.github.tusharnagdive.codekit.kitcollection.struct;
 
+import io.github.tusharnagdive.codekit.kitcollection.baseview.UniChainImpl;
 import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
 import java.util.function.Function;
 
 public interface UniChain<T> {
+
+    static <T> UniChain<T> create() {
+        return new UniChainImpl<>();
+    }
+
     Integer length();
     UniNode<T> getHead();
     void uniChainPrint();
