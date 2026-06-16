@@ -1,4 +1,3 @@
-```markdown
 # 🧰 Tnagdive CodeKit
 
 A modern, lightning-fast, and lightweight Dependency Injection (DI) framework and utility toolkit for Java.
@@ -7,14 +6,6 @@ A modern, lightning-fast, and lightweight Dependency Injection (DI) framework an
 
 Beyond DI, CodeKit now ships with its own suite of built-in data structures and utilities that are automatically injected into your project with zero configuration.
 
-## 🚀 Why Use CodeKit?
-
-* **Zero Boilerplate:** Stop writing `new MyDependency()`. Let the toolkit build your object graph automatically.
-* **Interface-Ready:** Safely code to interfaces. The engine automatically finds and injects the correct implementations.
-* **Enterprise Scoping:** Native support for both Singletons (shared services) and Prototypes (fresh instances per injection).
-* **The "Batteries Included" Toolkit:** Access built-in, optimized data structures (like `UniChain`) directly from the framework.
-* **Plug-and-Play:** Wakes up instantly with a single method call: `CodeKit.onWire(this)`.
-
 ---
 
 ## 📦 Installation
@@ -22,9 +13,6 @@ Beyond DI, CodeKit now ships with its own suite of built-in data structures and 
 CodeKit is distributed via JitPack. You can easily include it in any Java 21+ Gradle or Maven project.
 
 ### Gradle (Kotlin DSL)
-
-Add the JitPack repository and the CodeKit dependency to your `build.gradle.kts`:
-
 ```kotlin
 repositories {
     mavenCentral()
@@ -38,8 +26,6 @@ dependencies {
 ```
 
 ### Maven
-
-Add the JitPack repository and the CodeKit dependency to your `pom.xml`:
 
 ```xml
 <repositories>
@@ -61,71 +47,33 @@ Add the JitPack repository and the CodeKit dependency to your `pom.xml`:
 
 ---
 
-## 📖 Quick Start Guide
+## 🚀 Features & Usage
 
-Using CodeKit takes less than 60 seconds.
+* **Zero Boilerplate:** Stop writing `new MyDependency()`. Let the toolkit build your object graph automatically.
+* **Interface-Ready:** Safely code to interfaces. The engine automatically finds and injects the correct implementations.
+* **Enterprise Scoping:** Native support for both Singletons (shared services) and Prototypes (fresh instances per injection).
+* **The "Batteries Included" Toolkit:** Access built-in, optimized data structures directly from the framework.
+* **Plug-and-Play:** Wakes up instantly with a single method call.
 
-### 1. Mark Your Components
+### Quick Start
 
-Tell CodeKit which classes it should manage by adding the `@KitComponent` annotation to your implementations. By default, these are created as **Singletons** (one shared instance for your whole app).
+CodeKit wires up your application in three simple steps:
 
 ```java
-import io.github.tusharnagdive.codekit.annotate.KitComponent;
-
-public interface PaymentService {
-    void process();
-}
-
+// 1. Mark your implementations
 @KitComponent
-public class StripePaymentService implements PaymentService {
-    @Override
-    public void process() {
-        System.out.println("Payment processed successfully.");
-    }
-}
+public class StripePaymentService implements PaymentService { ... }
 
-```
-
-### 2. Inject Your Dependencies
-
-Use the `@Onwired` annotation wherever you need a tool injected. CodeKit handles the rest.
-
-```java
-import io.github.tusharnagdive.codekit.annotate.Onwired;
-
+// 2. Inject your dependencies
 public class StoreController {
-    
-    // CodeKit automatically finds StripePaymentService and injects it here!
     @Onwired
     private PaymentService paymentService;
-    
-    public void checkout() {
-        paymentService.process();
-    }
 }
 
-```
-
-### 3. Wake Up the Toolkit
-
-In your application's entry point, call `CodeKit.onWire(this)`. This instantly scans your project's folders, instantiates your components, and wires everything together.
-
-```java
-import io.github.tusharnagdive.codekit.di.CodeKit;
-
+// 3. Wake up the toolkit in your entry point
 public class MainApplication {
-
-    @Onwired
-    private StoreController controller;
-
     public MainApplication() {
-        // Instantly scan, instantiate, and inject dependencies into this class
         CodeKit.onWire(this);
-    }
-
-    public static void main(String[] args) {
-        MainApplication app = new MainApplication();
-        app.controller.checkout(); // Output: "Payment processed successfully."
     }
 }
 
@@ -133,156 +81,17 @@ public class MainApplication {
 
 ---
 
-## ⚙️ Advanced Features (New in v1.0.2)
+## 📚 Documentation & Advanced Details
 
-### 1. Enterprise Scoping: Singletons vs. Prototypes
+**For detailed views, advanced features, and complete release notes, please check the `docs/` folder.**
 
-By default, DI frameworks share the exact same object across your entire application (The Singleton Trap). If you are building stateful objects or data structures, you need a brand-new instance every time you inject it.
+Inside the `docs/` directory of this repository, you will find:
 
-You can now explicitly tell CodeKit to generate a fresh instance on every `@Onwired` call by setting `singleton = false`:
-
-```java
-// Framework will generate a fresh instance everywhere it is injected!
-@KitComponent(singleton = false)
-public class TemporaryCache implements CacheManager { ... }
-
-```
-
-### 2. Built-in Utility Kit (Auto-Scanning)
-
-CodeKit is more than just an injector; it is a developer toolkit. CodeKit now silently auto-scans its own internal packages, giving you instant access to optimized utilities without any manual configuration.
-
-For example, you can instantly inject our built-in `UniChain` data structure:
-
-```java
-import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
-
-public class DataProcessor {
-    
-    // No setup required! CodeKit automatically provides this built-in Prototype tool.
-    @Onwired
-    private UniChain<Integer> numberChain;
-    
-    public DataProcessor() {
-        CodeKit.onWire(this);
-    }
-    
-    public void process() {
-        numberChain.addAtFirst(10);
-        numberChain.cheapSort();
-        numberChain.uniChainPrint();
-    }
-}
-
-```
-
-### 3. Optional Dependencies
-
-If a dependency is not strictly required for your class to function, you can prevent CodeKit from throwing a crash error by marking it as optional:
-
-```java
-@Onwired(required = false)
-private OptionalLogger optionalLogger; 
-
-```
-
-### 4. Custom Package Scanning
-
-By default, `CodeKit.onWire(this)` scans your toolkit and the package where the calling class lives. If your application has a complex structure and you need to scan specific external packages, use the overloaded method:
-
-```java
-// Scans the current package AND the specified database toolkit package
-CodeKit.onWire(this, "com.myapp.core", "com.myapp.database");
-
-```
+* **The Official Usage Guide:** Detailed instructions on Enterprise Scoping, Optional Dependencies, and Custom Package Scanning.
+* **KitCollections Manual:** How to use our programmatic collection factory and the Zero-Invasive Functional Sorting API (`userChain.enhancedSort(User::getId)`).
+* **Release Notes:** Comprehensive changelogs for the current and past framework versions.
 
 ---
-```markdown
-## ⚙️ Advanced Features (New in v1.0.2)
-
-### 1. Enterprise Scoping: Singletons vs. Prototypes
-By default, DI frameworks share the exact same object across your entire application (The Singleton Trap). If you are building stateful objects or data structures, you need a brand-new instance every time you inject it. 
-
-You can now explicitly tell CodeKit to generate a fresh instance on every `@Onwired` call by setting `singleton = false`:
-
-```java
-// Framework will generate a fresh instance everywhere it is injected!
-@KitComponent(singleton = false)
-public class TemporaryCache implements CacheManager { ... }
-
-```
-
-### 2. Built-in Utility Kit (Auto-Scanning)
-
-CodeKit is more than just an injector; it is a developer toolkit. CodeKit now silently auto-scans its own internal packages, giving you instant access to optimized utilities without any manual configuration.
-
-For example, you can instantly inject our built-in `UniChain` data structure:
-
-```java
-import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
-
-public class DataProcessor {
-    
-    // No setup required! CodeKit automatically provides this built-in Prototype tool.
-    @Onwired
-    private UniChain<Integer> numberChain;
-    
-    public DataProcessor() {
-        CodeKit.onWire(this);
-    }
-    
-    public void process() {
-        numberChain.addAtFirst(10);
-        numberChain.cheapSort();
-        numberChain.uniChainPrint();
-    }
-}
-
-```
-
-### 3. Optional Dependencies
-
-If a dependency is not strictly required for your class to function, you can prevent CodeKit from throwing a crash error by marking it as optional:
-
-```java
-@Onwired(required = false)
-private OptionalLogger optionalLogger; 
-
-```
-
-### 4. Custom Package Scanning
-
-By default, `CodeKit.onWire(this)` scans your toolkit and the package where the calling class lives. If your application has a complex structure and you need to scan specific external packages, use the overloaded method:
-
-```java
-// Scans the current package AND the specified database toolkit package
-CodeKit.onWire(this, "com.myapp.core", "com.myapp.database");
-
-```
-
-### 5. Programmatic Collection Factory (No Annotations Needed!)
-
-If you prefer not to use `@Onwired` to inject data structures, CodeKit provides a blazing-fast, static factory called `KitCollections`. This allows you to generate highly optimized, generic data structures on the fly inside any method.
-
-```java
-import io.github.tusharnagdive.codekit.kitcollection.KitCollections;
-import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
-
-public class AnalyticsEngine {
-    
-    public void trackHistory() {
-        // Generates a fresh instance instantly. No @Onwired required!
-        UniChain<String> historyChain = KitCollections.get(UniChain.class);
-        
-        historyChain.addAtFirst("User Login");
-        historyChain.addAtLast("User Logout");
-        historyChain.uniChainPrint();
-    }
-}
-
-```
-
-**The KitCollections Advantage:** The underlying implementations (like `UniChainImpl`) are completely hidden from the consumer to ensure clean architecture, and the factory uses target-type inference to guarantee type safety without throwing unchecked generic compilation warnings.
 
 ## 🤝 Contributing
 
@@ -291,4 +100,3 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 **Author:** Tushar Nagdive
 
 **License:** MIT
-

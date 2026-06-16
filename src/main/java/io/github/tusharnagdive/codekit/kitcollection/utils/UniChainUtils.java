@@ -1,9 +1,11 @@
 package io.github.tusharnagdive.codekit.kitcollection.utils;
 
 import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
+import java.util.Comparator;
 
 public class UniChainUtils {
-    public static <T extends Comparable<T>> UniNode<T> mergeSort(UniNode<T> head) {
+
+    public static <T> UniNode<T> mergeSort(UniNode<T> head, Comparator<T> comparator) {
         if (head == null || head.next == null) {
             return head;
         }
@@ -12,16 +14,16 @@ public class UniChainUtils {
         UniNode<T> nextOfMiddle = middle.next;
         middle.next = null;
 
-        UniNode<T> leftNode = mergeSort(head);
-        UniNode<T> rightNode = mergeSort(nextOfMiddle);
-        return merge(leftNode, rightNode);
+        UniNode<T> leftNode = mergeSort(head, comparator);
+        UniNode<T> rightNode = mergeSort(nextOfMiddle, comparator);
+
+        return merge(leftNode, rightNode, comparator);
     }
 
     private static <T> UniNode<T> split(UniNode<T> head) {
         if (head == null) {
             return head;
         }
-
         UniNode<T> slow = head;
         UniNode<T> fast = head;
         while (fast.next != null && fast.next.next != null) {
@@ -31,12 +33,12 @@ public class UniChainUtils {
         return slow;
     }
 
-    private static <T extends Comparable<T>> UniNode<T> merge(UniNode<T> left, UniNode<T> right) {
-        UniNode<T> sortedSlNode = new UniNode<T>(null);
+    private static <T> UniNode<T> merge(UniNode<T> left, UniNode<T> right, Comparator<T> comparator) {
+        UniNode<T> sortedSlNode = new UniNode<>(null);
         UniNode<T> tail = sortedSlNode;
 
         while (left != null && right != null) {
-            if(left.data.compareTo(right.data) < 0) {
+            if(comparator.compare(left.data, right.data) <= 0) {
                 tail.next = left;
                 left = left.next;
             } else {
@@ -46,13 +48,8 @@ public class UniChainUtils {
             tail = tail.next;
         }
 
-        if(left != null) {
-            tail.next = left;
-        }
-
-        if(right != null) {
-            tail.next = right;
-        }
+        if(left != null) { tail.next = left; }
+        if(right != null) { tail.next = right; }
 
         return sortedSlNode.next;
     }
