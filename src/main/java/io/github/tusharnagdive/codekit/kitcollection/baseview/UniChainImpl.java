@@ -5,18 +5,19 @@ import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
 import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
 import io.github.tusharnagdive.codekit.kitcollection.utils.UniChainUtils;
 
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.function.Function;
+
 @KitComponent(singleton = false)
-public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
+public class UniChainImpl<T> implements UniChain<T> {
 
     public UniNode<T> head;
 
-    public UniChainImpl() {
-    }
+    public UniChainImpl() {}
 
     @Override
-    public UniNode<T> getHead() {
-        return this.head;
-    }
+    public UniNode<T> getHead() { return this.head; }
 
     @Override
     public Integer length() {
@@ -41,25 +42,18 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
 
     @Override
     public void addAtFirst(T data) {
-        /*Step 1: Create the new Node*/
         UniNode<T> newNode = new UniNode<>(data);
-        // Step 2: Point the new node's 'next' to the current head
         newNode.next = head;
-        // Step 3: Shift the official 'head' reference to the new node
         head = newNode;
     }
 
     @Override
     public void addAtLast(T data) {
-        // Step 1: Create the new node
         UniNode<T> newNode = new UniNode<>(data);
-
-        // Step 2: Handle the edge case (Empty List)
         if(this.head == null){
             head = newNode;
-            return; // Exit the method early
+            return;
         }
-
         UniNode<T> current = head;
         while (current.next != null){
             current = current.next;
@@ -69,34 +63,22 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
 
     @Override
     public void insertAfter(T value, T data) {
-        // 1. Handle empty list
         if(head == null) {
             System.out.println("SL List is empty");
             return;
         }
-
         UniNode<T> current = head;
         boolean isPresent = false;
-
-        // 2. Loop until the end of the list (current != null)
         while (current != null) {
             if (current.data.equals(value)) {
                 isPresent = true;
-
-                // Only create the node when we know we need it
                 UniNode<T> newNode = new UniNode<>(data);
-
-                // Swap pointers
                 newNode.next = current.next;
                 current.next = newNode;
-
-                // Exit the loop immediately so we don't keep searching
                 break;
             }
             current = current.next;
         }
-
-        // 3. Fallback if value wasn't found
         if(!isPresent) {
             System.out.println("Provided value not present, data added at the end of the list");
             addAtLast(data);
@@ -105,43 +87,26 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
 
     @Override
     public void insertBefore(T value, T data) {
-        // 1. Handle empty list
         if (head == null) {
             System.out.println("SL List is empty");
             return;
         }
-
-        // 2. THE MISSING EDGE CASE: What if the target is the very first node?
         if (head.data.equals(value)) {
             addAtFirst(data);
-            return; // We are done!
+            return;
         }
-
-        // 3. Traverse the list, looking one step ahead
         UniNode<T> current = head;
         boolean isPresent = false;
-
-        // We loop as long as there is a "next" node to check
         while (current.next != null) {
-
-            // Peek ahead to see if the NEXT node is our target
             if (current.next.data.equals(value)) {
                 isPresent = true;
-
                 UniNode<T> newNode = new UniNode<>(data);
-
-                // Step A: Point new node to the target
                 newNode.next = current.next;
-
-                // Step B: Point current node to the new node
                 current.next = newNode;
-
-                break; // Stop searching once we insert
+                break;
             }
             current = current.next;
         }
-
-        // 4. Fallback if value wasn't found
         if (!isPresent) {
             System.out.println("Provided value not present, data added at the end of the list");
             addAtLast(data);
@@ -150,41 +115,26 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
 
     @Override
     public void insertAtIndex(T value, Integer targetIndex) {
-        // 1. Check Index 0 FIRST.
-        // This safely handles inserting the very first node into an empty list!
         if (targetIndex == 0) {
             addAtFirst(value);
             return;
         }
-
-        // 2. NOW check if the list is empty.
-        // If they want index 5 but the list is empty, we reject it.
         if (head == null) {
             System.out.println("SL List is empty. Cannot insert at index " + targetIndex);
             return;
         }
-
         UniNode<T> current = head;
         int index = 0;
-
-        // 3. Traverse and Count
         while (current != null) {
-            // Look one step ahead
             if ((index + 1) == targetIndex) {
                 UniNode<T> newNode = new UniNode<>(value);
-
-                // Pointer surgery
                 newNode.next = current.next;
                 current.next = newNode;
-
-                return; // 'return' completely exits the method, doing the job of 'break'
+                return;
             }
             current = current.next;
             index++;
         }
-
-        // 4. Out of Bounds Fallback
-        // If the loop finishes, and we get here, the targetIndex was too large.
         System.out.println("Error: Target index " + targetIndex + " is out of bounds.");
     }
 
@@ -192,59 +142,39 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
     public void removeFirst() {
         if (head == null) {
             System.out.println("SL List is already empty");
-        }else {
+        } else {
             head = head.next;
         }
     }
 
     @Override
     public void removeLast() {
-        // 1. Empty List Check (Added the return statement)
         if (head == null) {
             System.out.println("SL List is already empty");
             return;
         }
-
-        // 2. THE CRITICAL FIX: The Single Node Edge Case
-        // If the first node has no next node, it's the ONLY node.
         if (head.next == null) {
-            head = null; // Completely clear the list
+            head = null;
             return;
         }
-
-        // 3. Traversal
         UniNode<T> current = head;
-
-        // We can put the look-ahead logic right in the loop condition!
-        // It loops AS LONG AS the second-to-last node condition is NOT met.
         while (current.next.next != null) {
             current = current.next;
         }
-
-        // 4. Sever the tie
-        // Once the loop breaks, we know current is sitting on the second-to-last node.
         current.next = null;
     }
 
     @Override
     public void removeByValue(T value) {
-        // 1. Added the missing return statement
         if (head == null) {
             System.out.println("SL List is already empty");
             return;
         }
-
-        // 2. THE CORRECTED HEAD NODE CHECK
-        // If the head is the target, just shift the head pointer!
-        // We don't need to check current.next here. This safely handles single-node lists too.
         if (head.data.equals(value)) {
             head = head.next;
             return;
         }
-
         UniNode<T> current = head;
-
-        // 3. Traversal and Bypass
         while (current != null && current.next != null) {
             if (current.next.data.equals(value)) {
                 current.next = current.next.next;
@@ -260,12 +190,10 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
             System.out.println("SL List is already empty");
             return;
         }
-
-        if(head!= null && targetIndex.equals(0)) {
+        if(head != null && targetIndex.equals(0)) {
             head = head.next;
             return;
         }
-
         UniNode<T> current = head;
         int index = 0;
         while (current != null) {
@@ -283,44 +211,35 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
     public void clearSequentially() {
         UniNode<T> current = head;
         while (current != null) {
-            // Step 1: Hold the bridge (save the next node so we don't lose the list)
             UniNode<T> nextNode = current.next;
-            // Step 2: Burn the bridge (destroy the current node's connections and data)
             current.data = null;
             current.next = null;
-            // Step 3: Step forward
             current = nextNode;
         }
-        // Step 4: Reset the master anchor now that all nodes are destroyed
         head = null;
         System.out.println("List cleared sequentially.");
     }
 
     @Override
     public void clearInstantly() {
-        // Drop the master anchor.
-        // The Garbage Collector instantly orphans the first node,
-        // which orphans the second, which orphans the third, etc.
         head = null;
         System.out.println("List cleared instantly by the Garbage Collector.");
     }
 
     @Override
-    public void retrieveByValue(T value) {
+    public T retrieveByValue(T value) {
         if (head == null) {
-            System.out.println("SL List is already empty");
-            return;
+            throw new NullPointerException("UniChain is null");
         }
         UniNode<T> current = head;
         while (current != null) {
             if (current.data.equals(value)) {
                 System.out.println("("+current.data+")");
-                return;
+                return current.data;
             }
             current = current.next;
         }
-
-        System.out.println("no data found");
+        return null;
     }
 
     @Override
@@ -329,7 +248,6 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
             System.out.println("SL List is empty");
             return;
         }
-
         UniNode<T> current = head;
         int index = 0;
         while (current != null) {
@@ -340,7 +258,6 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
             current = current.next;
             index++;
         }
-
         System.out.println("Error: index out of bounds");
     }
 
@@ -349,11 +266,9 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
         if (head == null) {
             throw new IllegalArgumentException("SL List is empty");
         }
-
         if(nthValue == null || nthValue <= 0) {
             throw new IllegalArgumentException("nth value can't be null, 0, and  negative");
         }
-
         int diff = 1;
         UniNode<T> main = head;
         UniNode<T> reference = head;
@@ -364,29 +279,24 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
             main = main.next;
             diff++;
         }
-
         if(nthValue >= diff) {
             throw new IllegalArgumentException("nth value out of bounds");
         }
-        return  reference.data;
+        return reference.data;
     }
 
     @Override
     public void updateAtNode(Integer nodeNum, T value) {
-        // 1. Guard clause: Don't convert an update into an insert
         if (head == null) {
             throw new IllegalStateException("Cannot update: The linked list is empty.");
         }
-        // 2. Guard clause: Prevent zero or negative indexing bugs
         if (nodeNum == null || nodeNum <= 0) {
             throw new IllegalArgumentException("nodeNum must be 1 or greater.");
         }
         UniNode<T> current = head;
-        // Traverse to the desired node
         for (int i = 1; i < nodeNum && current != null; i++) {
             current = current.next;
         }
-        // 3. Update if found, otherwise throw out of bounds
         if (current != null) {
             current.data = value;
         } else {
@@ -399,42 +309,95 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
         if (head == null) {
             throw new IllegalArgumentException("SL List is empty");
         }
-        // Set up our placeholders before we start walking
-        UniNode<T> current = head;      // We start holding the very first node
-        UniNode<T> prev = null;         // There is no "previous" node yet
-        UniNode<T> next = null;         // A placeholder for our safety save
+        UniNode<T> current = head;
+        UniNode<T> prev = null;
+        UniNode<T> next = null;
 
-        // Keep doing this shuffle until we run out of nodes
         while (current != null) {
-            // STEP 1: Look ahead and save
-            // Grab the address of the rest of the list so we don't lose it!
             next = current.next;
-            // STEP 2: Turn around!
-            // Change the current node's arrow to point backwards
             current.next = prev;
-            // STEP 3: Step forward (Part 1)
-            // We are done with this node, so it becomes the 'prev' for the next round
             prev = current;
-            // STEP 4: Step forward (Part 2)
-            // Move our 'current' hand to the saved 'nextNode' to continue down the line
             current = next;
         }
-        // When the loop finishes, 'current' is null, and 'prev' is holding
-        // what used to be the last node. This is our new starting point!
         head = prev;
     }
 
     @Override
-    public void cheapSort() {
-        if (head == null || head.next == null) {
+    public void concatenate(UniChain<T> uniChain) {
+        if(uniChain == null || uniChain.getHead() == null) { return; }
+        if(this.head == null) {
+            this.head = uniChain.getHead();
             return;
         }
+        UniNode<T> current = head;
+        while (current.next != null) {
+            current = current.next;
+        }
+        current.next = uniChain.getHead();
+    }
+
+    @Override
+    public boolean isUniChainCircular() {
+        if(head == null || head.next == null) { return false; }
+        UniNode<T> slow = head;
+        UniNode<T> fast = head;
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if(slow == fast) { return true; }
+        }
+        return false;
+    }
+
+    @Override
+    public void removeDuplicates() {
+        if(head == null || head.next == null) { return; }
+        HashSet<T> seen = new HashSet<>();
+        UniNode<T> current = head;
+        UniNode<T> prev = head;
+        while (current != null) {
+            if(seen.contains(current.data)) {
+                prev.next = current.next;
+            } else {
+                seen.add(current.data);
+                prev = current;
+            }
+            current = current.next;
+        }
+    }
+
+    @Override
+    public boolean hasDuplicate() {
+        if (head == null || head.next == null) { return false; }
+        HashSet<T> seen = new HashSet<>();
+        UniNode<T> current = head;
+        while (current != null) {
+            if(!seen.add(current.data)) { return true; }
+            current = current.next;
+        }
+        return false;
+    }
+
+    // --- SORTING IMPLEMENTATIONS ---
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void cheapSort() {
+        if (head == null || head.next == null) { return; }
+
+        if (!(head.data instanceof Comparable)) {
+            System.err.println("CodeKit Warning: Cannot sort natively because "
+                    + head.data.getClass().getSimpleName() + " does not implement Comparable. Use the functional method.");
+            return;
+        }
+
         boolean isSwapped;
         do {
             isSwapped = false;
             UniNode<T> current = head;
             while (current != null && current.next != null) {
-                if (current.data.compareTo(current.next.data) > 0) {
+                Comparable currentData = (Comparable) current.data;
+                if (currentData.compareTo(current.next.data) > 0) {
                     isSwapped = true;
                     T temp = current.data;
                     current.data = current.next.data;
@@ -446,27 +409,40 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
     }
 
     @Override
+    @SuppressWarnings({"unchecked"})
     public void enhancedSort() {
-        UniChainUtils.mergeSort(head);
+        if (head == null || head.next == null) { return; }
+        if (!(head.data instanceof Comparable)) {
+            System.err.println("CodeKit Warning: Cannot sort natively because "
+                    + head.data.getClass().getSimpleName() + " does not implement Comparable. Use the functional method.");
+            return;
+        }
+        this.head = UniChainUtils.mergeSort(this.head, (Comparator<T>) Comparator.naturalOrder());
     }
 
     @Override
-    public void concatenate(UniChain<T> uniChain) {
-        // Edge Case 1: If the second list is empty or null, do nothing
-        if(uniChain == null || uniChain.getHead() == null) {
-            return;
-        }
-        // Edge Case 2: If the first list is empty, point its head to the second list
-        if(this.head == null) {
-            this.head = uniChain.getHead();
-            return;
-        }
-        // Standard Case: Traverse to the last node of the first list
-        UniNode<T> current = head;
-        while (current.next != null) {
-            current = current.next;
-        }
-        // Link the tail of the first list to the head of the second list
-        current.next = uniChain.getHead();
+    public <U extends Comparable<? super U>> void cheapSort(Function<? super T, ? extends U> keyExtractor) {
+        if (head == null || head.next == null) { return; }
+        Comparator<T> secretComparator = Comparator.comparing(keyExtractor);
+        boolean isSwapped;
+        do {
+            isSwapped = false;
+            UniNode<T> current = head;
+            while (current != null && current.next != null) {
+                if (secretComparator.compare(current.data, current.next.data) > 0) {
+                    isSwapped = true;
+                    T temp = current.data;
+                    current.data = current.next.data;
+                    current.next.data = temp;
+                }
+                current = current.next;
+            }
+        } while (isSwapped);
+    }
+
+    @Override
+    public <U extends Comparable<? super U>> void enhancedSort(Function<? super T, ? extends U> keyExtractor) {
+        Comparator<T> secretComparator = Comparator.comparing(keyExtractor);
+        this.head = UniChainUtils.mergeSort(this.head, secretComparator);
     }
 }
