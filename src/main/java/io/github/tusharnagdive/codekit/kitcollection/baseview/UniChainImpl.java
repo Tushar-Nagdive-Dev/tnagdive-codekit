@@ -5,6 +5,8 @@ import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
 import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
 import io.github.tusharnagdive.codekit.kitcollection.utils.UniChainUtils;
 
+import java.util.HashSet;
+
 @KitComponent(singleton = false)
 public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
 
@@ -306,21 +308,19 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
     }
 
     @Override
-    public void retrieveByValue(T value) {
+    public T retrieveByValue(T value) {
         if (head == null) {
-            System.out.println("SL List is already empty");
-            return;
+            throw new NullPointerException("UniChain is null");
         }
         UniNode<T> current = head;
         while (current != null) {
             if (current.data.equals(value)) {
                 System.out.println("("+current.data+")");
-                return;
+                return current.data;
             }
             current = current.next;
         }
-
-        System.out.println("no data found");
+        return null;
     }
 
     @Override
@@ -425,9 +425,15 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void cheapSort() {
         if (head == null || head.next == null) {
             return;
+        }
+        if (!(head.data instanceof Comparable)) {
+            System.err.println("CodeKit Warning: Cannot sort this UniChain because "
+                    + head.data.getClass().getSimpleName() + " does not implement Comparable.");
+            return; // Exit the method safely without crashing
         }
         boolean isSwapped;
         do {
@@ -489,4 +495,44 @@ public class UniChainImpl<T extends Comparable<T>> implements UniChain<T> {
 
         return false;
     }
+
+    @Override
+    public void removeDuplicates() {
+        if(head == null || head.next == null) {
+            return;
+        }
+
+        HashSet<T> seen = new HashSet<>();
+        UniNode<T> current = head;
+        UniNode<T> prev = head;
+
+        while (current != null) {
+            if(seen.contains(current.data)) {
+                prev.next = current.next;
+            }else {
+                seen.add(current.data);
+                prev = current;
+            }
+            current = current.next;
+        }
+    }
+
+    @Override
+    public boolean hasDuplicate() {
+        if (head == null || head.next == null) {
+            return false;
+        }
+
+        HashSet<T> seen = new HashSet<>();
+        UniNode<T> current = head;
+
+        while (current != null) {
+            if(!seen.add(current.data)) {
+                return true;
+            }
+            current = current.next;
+        }
+        return false;
+    }
+
 }

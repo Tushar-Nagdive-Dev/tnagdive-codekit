@@ -2,7 +2,7 @@ package io.github.tusharnagdive.codekit.kitcollection.struct;
 
 import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
 
-public interface UniChain<T> {
+public interface UniChain<T extends Comparable<T>> {
     Integer length();
 
     UniNode<T> getHead();
@@ -31,7 +31,7 @@ public interface UniChain<T> {
 
     void clearInstantly();
 
-    void retrieveByValue(T value);
+    T retrieveByValue(T value);
 
     void retrieveAtIndex(Integer index);
 
@@ -48,4 +48,9 @@ public interface UniChain<T> {
     void concatenate(UniChain<T> uniChain);
 
     boolean isUniChainCircular();
+
+    void removeDuplicates();
+
+    boolean hasDuplicate();
+
 }

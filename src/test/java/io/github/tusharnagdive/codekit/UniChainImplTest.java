@@ -15,20 +15,22 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UniChainImplTest {
 
     private UniChainImpl<Integer> uniChain;
+    private UniChainImpl<String> uniChainString;
 
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
+//    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+//    private final PrintStream originalOut = System.out;
 
     @BeforeEach
     void setUp() {
         uniChain = new UniChainImpl<>();
-        System.setOut(new PrintStream(outContent));
+        uniChainString = new UniChainImpl<>();
+//        System.setOut(new PrintStream(outContent));
     }
 
-    @AfterEach
-    void tearDown() {
-        System.setOut(originalOut);
-    }
+//    @AfterEach
+//    void tearDown() {
+//        System.setOut(originalOut);
+//    }
 
     @Test
     void testAddAtFirstAndLength() {
@@ -153,9 +155,8 @@ public class UniChainImplTest {
     void testRetrieveByValue() {
         uniChain.addAtLast(10);
         uniChain.addAtLast(20);
-        uniChain.retrieveByValue(20);
-
-        assertTrue(outContent.toString().contains("(20)"));
+        Integer value = uniChain.retrieveByValue(20);
+        assertEquals(20, value);
     }
 
     @Test
@@ -249,5 +250,18 @@ public class UniChainImplTest {
         tail.next = uniChain.head.next;
 
         assertTrue(uniChain.isUniChainCircular());
+    }
+
+    @Test
+    void testRemoveDuplicates() {
+        uniChainString.addAtFirst("str1");
+        uniChainString.addAtFirst("str2");
+        uniChainString.addAtFirst("str3");
+        uniChainString.addAtFirst("str4");
+        uniChainString.addAtFirst("str2");
+        uniChainString.addAtFirst("str3");
+        uniChainString.removeDuplicates();
+
+        assertEquals(4, uniChainString.length());
     }
 }
