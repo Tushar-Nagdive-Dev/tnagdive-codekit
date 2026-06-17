@@ -1,129 +1,441 @@
-# 🧰 CodeKit Data Structures: Mastering `UniChain`
+# 🧰 CodeKit Collections: UniChain<T>
 
-While CodeKit is known for its blazing-fast Dependency Injection engine, **v1.0.2** introduces the `KitCollections` toolkit—a suite of high-performance, enterprise-grade data structures. 
+## Version 1.0.2 Documentation
 
-The crown jewel of this toolkit is **`UniChain<T>`**: an enhanced, universally flexible Singly Linked List. It is designed to be completely **Zero-Invasive**, meaning it adapts to your custom domain models without forcing you to modify them.
+### Overview
 
-This guide covers how to instantiate a `UniChain`, use its standard operations, and master its revolutionary functional sorting API.
+`UniChain<T>` is CodeKit's enterprise-grade, generic singly linked list implementation designed for modern Java applications.
 
----
-
-## 1. Instantiating a `UniChain`
-
-You can inject `UniChain` via `@Onwired` if you are using CodeKit's DI engine, but the cleanest way to generate a temporary data structure on the fly is using the **Programmatic Factory**.
+Unlike traditional collection frameworks, UniChain follows a **Zero-Invasive Design Philosophy**, allowing developers to work with plain domain models without requiring framework inheritance, custom wrappers, or interface implementations.
 
 ```java
-import io.github.tusharnagdive.codekit.kitcollection.KitCollections;
-import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
-
-public class DataService {
-    public void processData() {
-        // Generates a fresh, highly optimized instance instantly!
-        UniChain<String> logs = KitCollections.get(UniChain.class);
-        logs.addAtLast("System Boot");
-    }
-}
-
-```
-
----
-
-## 2. Standard Operations (The Essentials)
-
-`UniChain` comes with a massive suite of built-in methods that go far beyond a standard Java `LinkedList`.
-
-### Insertion & Deletion
-
-* `addAtFirst(T data)` / `addAtLast(T data)`
-* `insertAtIndex(T value, Integer index)`
-* `insertBefore(T target, T data)` / `insertAfter(T target, T data)`
-* `removeFirst()` / `removeLast()`
-* `removeByValue(T value)` / `removeAtIndex(Integer index)`
-
-### Retrieval & Updating
-
-* `retrieveByValue(T value)` / `retrieveAtIndex(Integer index)`
-* `getNthEnd(Integer nthValue)`: Safely fetches the Nth node from the *end* of the list.
-* `updateAtNode(Integer nodeNum, T value)`
-
-### Advanced List Manipulations
-
-* `reverse()`: Reverses the entire chain in-place.
-* `concatenate(UniChain<T> otherChain)`: Merges another `UniChain` to the end of this one.
-* `removeDuplicates()` / `hasDuplicate()`: Fast duplicate detection and removal.
-* `isUniChainCircular()`: Detects infinite loops (cycles) in the chain.
-* `clearSequentially()` / `clearInstantly()`: Memory-safe list destruction.
-
----
-
-## 3. The Zero-Invasive Sorting Engine (The Star Feature)
-
-In standard Java, sorting a custom object (like a `User`) requires you to modify your `User` class to implement `Comparable` or write clunky `Comparator` classes.
-
-`UniChain` fixes this. It allows you to store **pure, untouched domain models** and sort them dynamically on the fly using a clean Functional API. You just pass a method reference (Getter) telling the framework which field to look at.
-
-### The Two Sorting Algorithms
-
-1. **`cheapSort(Function keyExtractor)`**: Best for small datasets. Memory efficient, but slower for massive lists.
-2. **`enhancedSort(Function keyExtractor)`**: Powered by a highly optimized internal `mergeSort`. Best for massive enterprise datasets.
-
-### Example: Sorting Custom Objects
-
-```java
-// 1. A completely standard, untouched Java class
 public class User {
-    private int id;
+
+    private Integer id;
     private String name;
-    
-    public User(int id, String name) { this.id = id; this.name = name; }
-    public int getId() { return id; }
-    public String getName() { return name; }
-}
 
-// 2. The Implementation
-public class UserService {
-    public void rankUsers() {
-        UniChain<User> userChain = KitCollections.get(UniChain.class);
-        userChain.addAtLast(new User(3, "Charlie"));
-        userChain.addAtLast(new User(1, "Alice"));
-        userChain.addAtLast(new User(2, "Bob"));
+    public Integer getId() {
+        return id;
+    }
 
-        // Sort mathematically by ID using the high-speed enhanced sort!
-        userChain.enhancedSort(User::getId);
-        
-        // Or sort alphabetically by Name!
-        userChain.cheapSort(User::getName);
+    public String getName() {
+        return name;
     }
 }
+```
 
+The `User` class above can be stored, manipulated, and sorted directly within UniChain without implementing `Comparable<User>`.
+
+---
+
+# Creating a UniChain
+
+## Recommended Approach
+
+```java
+UniChain<User> users = UniChain.create();
+```
+
+### Why `create()`?
+
+CodeKit v1.1.0 adopts the Static Factory Pattern used throughout modern Java APIs.
+
+Examples from the Java Platform:
+
+```java
+List<String> list = List.of();
+
+Optional<User> user = Optional.of(value);
+```
+
+Following the same principle:
+
+```java
+UniChain<User> users = UniChain.create();
+```
+
+Benefits:
+
+* No unchecked casting
+* No registry lookups
+* No reflection
+* Better IDE auto-completion
+* Cleaner developer experience
+* Hidden implementation details
+* Improved maintainability
+
+---
+
+# Deprecated API
+
+## Deprecated Since v1.0.2
+
+```java
+UniChain<User> users =
+        KitCollections.get(UniChain.class);
+```
+
+### Status
+
+⚠ Deprecated
+
+### Removal Target
+
+CodeKit v2.0.0
+
+### Why Was It Deprecated?
+
+The original factory relied on runtime type resolution.
+
+```java
+KitCollections.get(UniChain.class);
+```
+
+Although functional, this approach introduced several architectural drawbacks:
+
+### 1. Runtime Type Lookup
+
+Every creation request required registry resolution.
+
+```java
+registry.get(UniChain.class);
+```
+
+This adds unnecessary indirection for a structure whose implementation is already known.
+
+### 2. Unchecked Generic Casting
+
+The internal implementation relied on type casting.
+
+```java
+return (T) supplier.get();
+```
+
+Compile-time safety becomes weaker and IDE assistance is reduced.
+
+### 3. Reduced API Discoverability
+
+Developers must know that a factory class exists before creating collections.
+
+```java
+KitCollections.get(...)
+```
+
+Whereas:
+
+```java
+UniChain.create()
+```
+
+is immediately discoverable from the collection interface itself.
+
+### 4. Increased Maintenance Cost
+
+Every new collection required manual registry registration.
+
+```java
+registry.put(UniChain.class, UniChainImpl::new);
+```
+
+Future structures such as:
+
+* BiChain
+* StackChain
+* QueueChain
+* PriorityChain
+
+would all require additional registry maintenance.
+
+---
+
+# Migration Guide
+
+## Before
+
+```java
+UniChain<Integer> numbers =
+        KitCollections.get(UniChain.class);
+```
+
+## After
+
+```java
+UniChain<Integer> numbers =
+        UniChain.create();
+```
+
+No additional code changes are required.
+
+---
+
+# Core Operations
+
+## Insert Operations
+
+```java
+addAtFirst(T value);
+addAtLast(T value);
+
+insertBefore(T target, T value);
+insertAfter(T target, T value);
+
+insertAtIndex(T value, Integer index);
 ```
 
 ---
 
-## 4. Legacy Sorters & Guard Clauses
-
-If you are storing native Java types that already know how to sort themselves (like `Integer` or `String`), you can use the legacy no-args sorters:
+## Delete Operations
 
 ```java
-UniChain<Integer> numbers = KitCollections.get(UniChain.class);
+removeFirst();
+removeLast();
+
+removeByValue(T value);
+removeAtIndex(Integer index);
+```
+
+---
+
+## Retrieval Operations
+
+```java
+retrieveByValue(T value);
+
+retrieveAtIndex(Integer index);
+
+getNthEnd(Integer n);
+```
+
+---
+
+## Update Operations
+
+```java
+updateAtNode(Integer nodeNumber, T value);
+```
+
+---
+
+## Structural Operations
+
+```java
+reverse();
+
+concatenate(UniChain<T> otherChain);
+
+clearInstantly();
+
+clearSequentially();
+```
+
+---
+
+## Validation Utilities
+
+```java
+hasDuplicate();
+
+removeDuplicates();
+
+isUniChainCircular();
+```
+
+---
+
+# Functional Sorting Engine
+
+One of UniChain's most powerful capabilities is its Functional Sorting Engine.
+
+Traditional Java collections often require:
+
+```java
+implements Comparable<User>
+```
+
+or
+
+```java
+new Comparator<User>() { ... }
+```
+
+UniChain eliminates both requirements.
+
+---
+
+## Sorting by a Property
+
+```java
+UniChain<User> users = UniChain.create();
+
+users.enhancedSort(User::getId);
+```
+
+---
+
+## Sorting by Name
+
+```java
+users.enhancedSort(User::getName);
+```
+
+---
+
+## Sorting by Salary
+
+```java
+users.enhancedSort(User::getSalary);
+```
+
+---
+
+# Available Sorting Algorithms
+
+## cheapSort(Function)
+
+Algorithm:
+
+```text
+Bubble Sort
+```
+
+Complexity:
+
+```text
+O(n²)
+```
+
+Recommended for:
+
+* Small datasets
+* Educational demonstrations
+* Memory-sensitive workloads
+
+---
+
+## enhancedSort(Function)
+
+Algorithm:
+
+```text
+Merge Sort
+```
+
+Complexity:
+
+```text
+O(n log n)
+```
+
+Recommended for:
+
+* Enterprise applications
+* Large datasets
+* Production workloads
+
+---
+
+# Natural Sorting
+
+For Java types that already implement Comparable:
+
+```java
+UniChain<Integer> numbers = UniChain.create();
+
 numbers.addAtLast(50);
 numbers.addAtLast(10);
-numbers.enhancedSort(); // Automatically sorts numerically!
 
+numbers.enhancedSort();
 ```
 
-### 🛡️ The Crash-Proof Guard Clause
+Output:
 
-What happens if a developer accidentally calls `cheapSort()` (with no arguments) on a list of `User` objects? Standard Java would instantly crash with a fatal `ClassCastException`.
+```text
+10
+50
+```
 
-CodeKit uses **Runtime Guard Clauses**. It intercepts the mistake, safely aborts the sorting process, prevents your application from crashing, and prints a helpful diagnostic warning guiding you to use the functional API:
+Supported examples:
 
-> `CodeKit Warning: Cannot sort natively because User does not implement Comparable. Use the functional method.`
+* Integer
+* Long
+* Double
+* Float
+* String
+* LocalDate
+* LocalDateTime
 
 ---
 
-## 5. Why Choose UniChain?
+# Runtime Safety Guards
 
-* **Type Safety:** Target-type inference guarantees your data without unchecked cast warnings.
-* **Architecture Integrity:** The underlying implementation (`UniChainImpl`) is completely hidden from the user, enforcing clean abstraction.
-* **Developer Experience (DX):** Auto-completing functional method references (`User::getId`) make sorting complex data a one-line task.
+CodeKit protects applications from accidental misuse.
+
+Example:
+
+```java
+UniChain<User> users = UniChain.create();
+
+users.enhancedSort();
+```
+
+Since `User` does not implement Comparable, CodeKit safely aborts the operation and displays a diagnostic warning.
+
+```text
+CodeKit Warning:
+Cannot sort natively because User does not implement Comparable.
+Use the functional sorting API instead.
+```
+
+This prevents runtime failures such as:
+
+```java
+ClassCastException
+```
+
+and helps maintain application stability.
+
+---
+
+# Design Principles
+
+Every CodeKit collection follows the same architectural principles.
+
+✓ Generic First
+
+✓ Zero-Invasive Domain Models
+
+✓ Functional APIs
+
+✓ Hidden Implementations
+
+✓ Runtime Safety Guards
+
+✓ Enterprise-Ready Performance
+
+✓ Modern Java Design Patterns
+
+---
+
+# Roadmap
+
+Upcoming collections planned for the CodeKit Collections ecosystem:
+
+```java
+BiChain<T>
+StackChain<T>
+QueueChain<T>
+PriorityChain<T>
+TreeChain<T>
+```
+
+All future collections will follow the same creation model:
+
+```java
+BiChain.create();
+
+StackChain.create();
+
+QueueChain.create();
+```
+
+ensuring a consistent and intuitive developer experience across the entire framework.

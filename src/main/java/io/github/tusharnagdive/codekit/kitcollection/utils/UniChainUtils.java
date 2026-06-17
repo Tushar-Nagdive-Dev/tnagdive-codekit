@@ -1,6 +1,6 @@
 package io.github.tusharnagdive.codekit.kitcollection.utils;
 
-import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
+import io.github.tusharnagdive.codekit.kitcollection.unichain.UniNode;
 import java.util.Comparator;
 
 public class UniChainUtils {
