@@ -1,8 +1,7 @@
 package io.github.tusharnagdive.codekit;
 
-import io.github.tusharnagdive.codekit.kitcollection.baseview.UniChainImpl;
-import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
-import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
+import io.github.tusharnagdive.codekit.kitcollection.unichain.UniNode;
+import io.github.tusharnagdive.codekit.kitcollection.unichain.UniChain;
 import io.github.tusharnagdive.codekit.model.Users;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UniChainImplTest {
 
-    private UniChainImpl<Integer> uniChain;
-    private UniChainImpl<String> uniChainString;
+    private UniChain<Integer> uniChain;
+    private UniChain<String> uniChainString;
 
 
     @BeforeEach
     void setUp() {
-        uniChain = new UniChainImpl<>();
-        uniChainString = new UniChainImpl<>();
+        uniChain = UniChain.create();
+        uniChainString = UniChain.create();
     }
 
     @Test
@@ -207,7 +206,7 @@ public class UniChainImplTest {
         uniChain.addAtLast(1);
         uniChain.addAtLast(2);
 
-        UniChain<Integer> uniChain2 = new UniChainImpl<>();
+        UniChain<Integer> uniChain2 = UniChain.create();
         uniChain2.addAtLast(3);
         uniChain2.addAtLast(4);
 
@@ -236,7 +235,7 @@ public class UniChainImplTest {
         // Artificially create a loop for testing: Tail points back to Head
         UniNode<Integer> tail = uniChain.getHead().next.next.next;
         // Node with value 20
-        tail.next = uniChain.head.next;
+        tail.next = uniChain.getHead().next;
 
         assertTrue(uniChain.isUniChainCircular());
     }
@@ -256,7 +255,7 @@ public class UniChainImplTest {
 
     @Test
     void testIndexOf() {
-        UniChain<Users> usersUniChain = new UniChainImpl<>();
+        UniChain<Users> usersUniChain = UniChain.create();
         Users user1 = new Users(1, "user1", "user1@mail.com", "username01");
         usersUniChain.addAtLast(user1);
         Users user2 = new Users(2, "user2", "user2@mail.com", "username02");

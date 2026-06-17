@@ -1,4 +1,4 @@
-package io.github.tusharnagdive.codekit.kitcollection.node;
+package io.github.tusharnagdive.codekit.kitcollection.unichain;
 
 public class UniNode<T> {
     public T data;

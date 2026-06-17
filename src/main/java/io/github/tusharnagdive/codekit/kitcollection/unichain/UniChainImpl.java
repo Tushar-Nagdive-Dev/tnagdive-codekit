@@ -1,8 +1,6 @@
-package io.github.tusharnagdive.codekit.kitcollection.baseview;
+package io.github.tusharnagdive.codekit.kitcollection.unichain;
 
 import io.github.tusharnagdive.codekit.annotate.KitComponent;
-import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
-import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
 import io.github.tusharnagdive.codekit.kitcollection.utils.UniChainUtils;
 
 import java.util.Comparator;
@@ -12,7 +10,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 @KitComponent(singleton = false)
-public class UniChainImpl<T> implements UniChain<T> {
+final class UniChainImpl<T> implements UniChain<T> {
 
     public UniNode<T> head;
 

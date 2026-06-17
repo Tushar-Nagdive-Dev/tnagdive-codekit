@@ -31,7 +31,7 @@ public class DIContext {
 
         for (Field field : clazz.getDeclaredFields()) {
             if (field.isAnnotationPresent(Onwired.class)) {
-
+                Class<?> fieldType = field.getType();
                 Object dependency = findDependency(field.getType());
 
                 if (dependency != null) {

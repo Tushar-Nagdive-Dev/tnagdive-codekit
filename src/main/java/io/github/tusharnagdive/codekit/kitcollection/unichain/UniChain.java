@@ -1,7 +1,5 @@
-package io.github.tusharnagdive.codekit.kitcollection.struct;
+package io.github.tusharnagdive.codekit.kitcollection.unichain;
 
-import io.github.tusharnagdive.codekit.kitcollection.baseview.UniChainImpl;
-import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
 import java.util.function.Function;
 
 /**
@@ -10,7 +8,7 @@ import java.util.function.Function;
  *
  * @param <T> The type of objects contained in the chain.
  */
-public interface UniChain<T> {
+public sealed interface UniChain<T> permits UniChainImpl{
 
     /**
      * Creates a new instance of UniChain.
