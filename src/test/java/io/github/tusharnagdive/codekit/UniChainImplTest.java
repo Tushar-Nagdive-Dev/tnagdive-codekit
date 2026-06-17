@@ -3,12 +3,9 @@ package io.github.tusharnagdive.codekit;
 import io.github.tusharnagdive.codekit.kitcollection.baseview.UniChainImpl;
 import io.github.tusharnagdive.codekit.kitcollection.node.UniNode;
 import io.github.tusharnagdive.codekit.kitcollection.struct.UniChain;
-import org.junit.jupiter.api.AfterEach;
+import io.github.tusharnagdive.codekit.model.Users;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,20 +14,12 @@ public class UniChainImplTest {
     private UniChainImpl<Integer> uniChain;
     private UniChainImpl<String> uniChainString;
 
-//    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-//    private final PrintStream originalOut = System.out;
 
     @BeforeEach
     void setUp() {
         uniChain = new UniChainImpl<>();
         uniChainString = new UniChainImpl<>();
-//        System.setOut(new PrintStream(outContent));
     }
-
-//    @AfterEach
-//    void tearDown() {
-//        System.setOut(originalOut);
-//    }
 
     @Test
     void testAddAtFirstAndLength() {
@@ -263,5 +252,55 @@ public class UniChainImplTest {
         uniChainString.removeDuplicates();
 
         assertEquals(4, uniChainString.length());
+    }
+
+    @Test
+    void testIndexOf() {
+        UniChain<Users> usersUniChain = new UniChainImpl<>();
+        Users user1 = new Users(1, "user1", "user1@mail.com", "username01");
+        usersUniChain.addAtLast(user1);
+        Users user2 = new Users(2, "user2", "user2@mail.com", "username02");
+        usersUniChain.addAtLast(user2);
+        Users user3 = new Users(3, "user3", "user3@mail.com", "username03");
+        usersUniChain.addAtLast(user3);
+        Users user4 = new Users(4, "user4", "user4@mail.com", "username04");
+        usersUniChain.addAtLast(user4);
+        Users user5 = new Users(5, "user5", "user5@mail.com", "username05");
+        usersUniChain.addAtLast(user5);
+
+        Integer returnIndex = usersUniChain.indexOf(Users::getUsername, "username03");
+        assertEquals(2, returnIndex);
+
+        UniChain<Integer> uniChainInteger = UniChain.create();
+        uniChainInteger.addAtLast(1);
+        uniChainInteger.addAtLast(2);
+        uniChainInteger.addAtLast(3);
+        uniChainInteger.addAtLast(4);
+        uniChainInteger.addAtLast(5);
+        uniChainInteger.addAtLast(6);
+        uniChainInteger.addAtLast(7);
+
+        Integer returnedIndex = uniChainInteger.indexOf(3);
+        assertEquals(2, returnedIndex);
+    }
+
+    @Test
+    void testRetrieveAtIndex() {
+        UniChain<Users> usersUniChain = UniChain.create();
+        Users user1 = new Users(1, "user1", "user1@mail.com", "username01");
+        usersUniChain.addAtLast(user1);
+        Users user2 = new Users(2, "user2", "user2@mail.com", "username02");
+        usersUniChain.addAtLast(user2);
+        Users user3 = new Users(3, "user3", "user3@mail.com", "username03");
+        usersUniChain.addAtLast(user3);
+        Users user4 = new Users(4, "user4", "user4@mail.com", "username04");
+        usersUniChain.addAtLast(user4);
+        Users user5 = new Users(5, "user5", "user5@mail.com", "username05");
+        usersUniChain.addAtLast(user5);
+
+        Integer returnIndex = usersUniChain.indexOf(Users::getEmail, "user4@mail.com");
+        Users returnedUser = usersUniChain.retrieveAtIndex(returnIndex);
+        IO.println(returnedUser);
+        assertEquals(user4, returnedUser);
     }
 }

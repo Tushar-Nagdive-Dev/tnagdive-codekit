@@ -7,6 +7,8 @@ import io.github.tusharnagdive.codekit.kitcollection.utils.UniChainUtils;
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 @KitComponent(singleton = false)
@@ -18,6 +20,28 @@ public class UniChainImpl<T> implements UniChain<T> {
 
     @Override
     public UniNode<T> getHead() { return this.head; }
+
+    @Override
+    public Integer indexOf(T value) {
+        return indexOf(x -> x, value);
+    }
+
+    @Override
+    public <R> Integer indexOf(Function<T, R> selector, R value) {
+        Integer index = 0;
+        UniNode<T> current = this.head;
+
+        while (current != null) {
+            R returnValue = selector.apply(current.data);
+            if(Objects.equals(returnValue, value)) {
+                return index;
+            }
+            current = current.next;
+            index++;
+        }
+
+        return -1;
+    }
 
     @Override
     public Integer length() {
@@ -234,7 +258,6 @@ public class UniChainImpl<T> implements UniChain<T> {
         UniNode<T> current = head;
         while (current != null) {
             if (current.data.equals(value)) {
-                System.out.println("("+current.data+")");
                 return current.data;
             }
             current = current.next;
@@ -349,15 +372,26 @@ public class UniChainImpl<T> implements UniChain<T> {
 
     @Override
     public void removeDuplicates() {
-        if(head == null || head.next == null) { return; }
-        HashSet<T> seen = new HashSet<>();
+        removeDuplicates(x -> x);
+    }
+
+    @Override
+    public <R> void removeDuplicates(Function<T, R> selector) {
+        if (head == null || head.next == null) return;
+
+        Set<R> seen = new HashSet<>();
         UniNode<T> current = head;
-        UniNode<T> prev = head;
+        UniNode<T> prev = null;
+
         while (current != null) {
-            if(seen.contains(current.data)) {
+            R key = selector.apply(current.data);
+
+            if (seen.contains(key)) {
+                // Duplicate found: link previous to the one after current
                 prev.next = current.next;
             } else {
-                seen.add(current.data);
+                // New item: track it and move prev forward
+                seen.add(key);
                 prev = current;
             }
             current = current.next;
