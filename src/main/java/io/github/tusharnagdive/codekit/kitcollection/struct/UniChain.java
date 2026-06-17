@@ -28,7 +28,7 @@ public interface UniChain<T> {
     void clearInstantly();
 
     T retrieveByValue(T value);
-    void retrieveAtIndex(Integer index);
+    T retrieveAtIndex(Integer index);
     T getNthEnd(Integer nthValue);
     void updateAtNode(Integer nodeNum, T value);
     void reverse();

@@ -243,22 +243,20 @@ public class UniChainImpl<T> implements UniChain<T> {
     }
 
     @Override
-    public void retrieveAtIndex(Integer targetIndex) {
+    public T retrieveAtIndex(Integer targetIndex) {
         if (head == null) {
-            System.out.println("SL List is empty");
-            return;
+            throw new NullPointerException("UniChain is null");
         }
         UniNode<T> current = head;
         int index = 0;
         while (current != null) {
             if(index == targetIndex) {
-                System.out.println("("+current.data+")");
-                return;
+                return (T) current.data;
             }
             current = current.next;
             index++;
         }
-        System.out.println("Error: index out of bounds");
+        throw new IndexOutOfBoundsException("Index " + targetIndex + " is out of bounds.");
     }
 
     @Override
