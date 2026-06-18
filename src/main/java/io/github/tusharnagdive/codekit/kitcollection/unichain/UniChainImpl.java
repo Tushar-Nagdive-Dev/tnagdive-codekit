@@ -250,17 +250,27 @@ final class UniChainImpl<T> implements UniChain<T> {
 
     @Override
     public T retrieveByValue(T value) {
+        return retrieveByValue(x -> x, value);
+    }
+
+    @Override
+    public <R> T retrieveByValue(Function<T, R> selector, R matchValue) {
         if (head == null) {
-            throw new NullPointerException("UniChain is null");
+            throw new NullPointerException("UniChain is empty");
         }
+
         UniNode<T> current = head;
         while (current != null) {
-            if (current.data.equals(value)) {
+            // Extract the field value (e.g., current.data.getId())
+            R fieldValue = selector.apply(current.data);
+
+            // Safely compare the extracted field with the desired matchValue
+            if (Objects.equals(fieldValue, matchValue)) {
                 return current.data;
             }
             current = current.next;
         }
-        return null;
+        return null; // Not found
     }
 
     @Override
