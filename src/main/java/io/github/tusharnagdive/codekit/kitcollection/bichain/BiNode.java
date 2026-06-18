@@ -1,7 +1,5 @@
 package io.github.tusharnagdive.codekit.kitcollection.bichain;
 
-import io.github.tusharnagdive.codekit.kitcollection.unichain.UniNode;
-
 public final class BiNode<T> {
     public T data;
     public BiNode<T> next;
