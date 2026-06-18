@@ -84,6 +84,9 @@ public sealed interface UniChain<T> permits UniChainImpl{
     /** Retrieves object matching value. */
     T retrieveByValue(T value);
 
+    /** Retrieves object matching value by ok field. */
+    <R> T retrieveByValue(Function<T, R> selector, R matchValue);
+
     /** Retrieves object at index. */
     T retrieveAtIndex(Integer index);
 
