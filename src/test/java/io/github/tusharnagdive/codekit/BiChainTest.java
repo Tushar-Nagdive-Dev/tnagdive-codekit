@@ -17,6 +17,45 @@ class BiChainTest {
     }
 
     @Test
+    void testFindMethods() {
+        intChain.addAtLast(10);
+        intChain.addAtLast(20);
+        intChain.addAtLast(10);
+
+        // findFromFirst should find the first 10
+        assertEquals(10, intChain.findFromFirst(10));
+        // findFromLast should start from tail and find the 10 at the end
+        assertEquals(10, intChain.findFromLast(10));
+    }
+
+    @Test
+    void testInsertAfterAndBefore() {
+        intChain.addAtLast(10);
+        intChain.addAtLast(30);
+
+        // 10 <-> 20 <-> 30
+        intChain.insertAfter(10, 20);
+        assertEquals(20, intChain.findFromFirst(20));
+
+        // 5 <-> 10 <-> 20 <-> 30
+        intChain.insertBefore(10, 5);
+        assertEquals(5, intChain.findFromFirst(5));
+    }
+
+    @Test
+    void testRemoveByValue() {
+        intChain.addAtLast(10);
+        intChain.addAtLast(20);
+        intChain.addAtLast(30);
+
+        intChain.removeByValue(20);
+
+        assertNull(intChain.findFromFirst(20), "20 should be removed");
+        assertNotNull(intChain.findFromFirst(10), "10 should still exist");
+        assertNotNull(intChain.findFromFirst(30), "30 should still exist");
+    }
+
+    @Test
     void testBasicAdditions() {
         intChain.addAtLast(10);
         intChain.addAtLast(20);
