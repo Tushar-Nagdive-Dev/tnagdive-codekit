@@ -2,6 +2,8 @@ package io.github.tusharnagdive.codekit.kitcollection.bichain;
 
 import io.github.tusharnagdive.codekit.annotate.KitComponent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -9,6 +11,18 @@ import java.util.function.Function;
 final class BiChainImpl<T> implements BiChain<T> {
     public BiNode<T> head;
     public BiNode<T> tail;
+
+    // In BiChainImpl
+    @Override
+    public List<T> toList() {
+        List<T> result = new ArrayList<>();
+        BiNode<T> current = head;
+        while(current != null) {
+            result.add(current.data);
+            current = current.next;
+        }
+        return result;
+    }
 
     @Override
     public void addAtLast(T data) {
@@ -294,16 +308,22 @@ final class BiChainImpl<T> implements BiChain<T> {
 
     @Override
     public void removeByValue(T data) {
+        removeByValue(x -> x, data);
+    }
+
+    public <R> void removeByValue(Function<T, R> selector, R matchValue) {
         if (this.head == null) return;
 
         BiNode<T> current = this.head;
         while (current != null) {
-            if (current.data.equals(data)) {
-                // We found the original node, now pass it to our O(1) deleter
-                removeNode(current);
-                return;
+            R fieldValue = selector.apply(current.data);
+
+            if (Objects.equals(fieldValue, matchValue)) {
+                removeNode(current); // Use your existing O(1) delete logic
+                return; // Exit after removing the first match
             }
             current = current.next;
         }
     }
+
 }

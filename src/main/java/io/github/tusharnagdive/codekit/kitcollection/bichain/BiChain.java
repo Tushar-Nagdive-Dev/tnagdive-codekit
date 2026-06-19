@@ -1,5 +1,6 @@
 package io.github.tusharnagdive.codekit.kitcollection.bichain;
 
+import java.util.List;
 import java.util.function.Function;
 
 public sealed interface BiChain<T> permits BiChainImpl {
@@ -23,6 +24,8 @@ public sealed interface BiChain<T> permits BiChainImpl {
         }
         return chain;
     }
+
+    List<T> toList();
 
     void addAtLast(T data);
 
@@ -53,4 +56,6 @@ public sealed interface BiChain<T> permits BiChainImpl {
     void removeNode(BiNode<T> node);
 
     void removeByValue(T data);
+
+    <R> void removeByValue(Function<T, R> selector, R matchValue);
 }
