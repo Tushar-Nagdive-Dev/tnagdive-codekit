@@ -5,12 +5,20 @@ import io.github.tusharnagdive.codekit.annotate.KitComponent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @KitComponent(singleton = false)
 final class BiChainImpl<T> implements BiChain<T> {
     public BiNode<T> head;
     public BiNode<T> tail;
+    private int size = 0;
+
+    @Override
+    public int size() {
+        return this.size;
+    }
 
     // In BiChainImpl
     @Override
@@ -18,6 +26,7 @@ final class BiChainImpl<T> implements BiChain<T> {
         List<T> result = new ArrayList<>();
         BiNode<T> current = head;
         while(current != null) {
+            size++;
             result.add(current.data);
             current = current.next;
         }
@@ -34,6 +43,7 @@ final class BiChainImpl<T> implements BiChain<T> {
             tail.next = newNode; // Current tail points to new node
             tail = newNode;      // Update tail reference
         }
+        size++;
     }
 
     @Override
@@ -87,6 +97,7 @@ final class BiChainImpl<T> implements BiChain<T> {
         head.prev = newNode;
         newNode.next = head;
         head = newNode;
+        size++;
     }
 
     @Override
@@ -158,6 +169,7 @@ final class BiChainImpl<T> implements BiChain<T> {
                     newNode.next.prev = newNode;
                 }
                 current.next = newNode;
+                size++;
                 return;
             }
             current = current.next;
@@ -196,6 +208,7 @@ final class BiChainImpl<T> implements BiChain<T> {
                 current.prev = newNode;
 
                 // 6. Insertion complete, exit the method
+                size++;
                 return;
             }
             current = current.next;
@@ -237,7 +250,7 @@ final class BiChainImpl<T> implements BiChain<T> {
                     this.head = newNode;
                 }
                 current.prev = newNode;
-
+                size++;
                 return;
             }
 
@@ -246,6 +259,7 @@ final class BiChainImpl<T> implements BiChain<T> {
                 BiNode<T> newNode = new BiNode<T>(data);
                 current.next = newNode;
                 newNode.prev = current;
+                size++;
                 return;
             }
 
@@ -271,6 +285,32 @@ final class BiChainImpl<T> implements BiChain<T> {
         } else  {
             this.tail = null;
         }
+        size--;
+    }
+
+    @Override
+    public <R> boolean update(Function<T, R> selector, R matchValue, Consumer<T> mutator) {
+        T foundData = get(selector, matchValue);
+
+        if (foundData != null) {
+            mutator.accept(foundData);
+            return true;
+        }
+        return false;
+    }
+
+    // For total data replacement
+    public <R> boolean replace(Function<T, R> selector, R matchValue, T newData) {
+        // Traverse manually to keep the reference
+        BiNode<T> current = head;
+        while (current != null) {
+            if (Objects.equals(selector.apply(current.data), matchValue)) {
+                current.data = newData; // Direct replacement
+                return true;
+            }
+            current = current.next;
+        }
+        return false;
     }
 
     @Override
@@ -285,6 +325,7 @@ final class BiChainImpl<T> implements BiChain<T> {
         }  else  {
             this.head = null;
         }
+        size--;
     }
 
     /**
@@ -304,6 +345,7 @@ final class BiChainImpl<T> implements BiChain<T> {
         // Clean up ties to the list to help the Garbage Collector
         nodeToDelete.next = null;
         nodeToDelete.prev = null;
+        size--;
     }
 
     @Override
@@ -320,10 +362,74 @@ final class BiChainImpl<T> implements BiChain<T> {
 
             if (Objects.equals(fieldValue, matchValue)) {
                 removeNode(current); // Use your existing O(1) delete logic
+                size--;
                 return; // Exit after removing the first match
             }
             current = current.next;
         }
     }
 
+    @Override
+    public T get(T value) {
+        return get(x -> x, value);
+    }
+
+    @Override
+    public <R> T get(Function<T, R> selector, R matchValue) {
+        AtomicReference<T> result = new AtomicReference<>();
+
+        Thread forward = Thread.startVirtualThread(() -> {
+            BiNode<T> current = this.head;
+            while (current != null && result.get() == null) {
+                if(Objects.equals(selector.apply(current.data), matchValue)) {
+                    result.compareAndSet(null, current.data);
+                }
+                current = current.next;
+            }
+        });
+
+        Thread backward = Thread.startVirtualThread(() -> {
+           BiNode<T> current = this.tail;
+           while (current != null && result.get() == null) {
+               if(Objects.equals(selector.apply(current.data), matchValue)) {
+                   result.compareAndSet(null, current.data);
+               }
+               current = current.prev;
+           }
+        });
+        try{
+            forward.join();
+            backward.join();
+        }catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+
+        return result.get();
+    }
+
+    @Override
+    public void reverse() {
+        if (head == null || head.next == null) return; // Empty or single-node list
+
+        BiNode<T> current = head;
+        BiNode<T> temp = null;
+
+        // Swap next and prev for every node
+        while (current != null) {
+            // Swap pointers
+            temp = current.prev;
+            current.prev = current.next;
+            current.next = temp;
+
+            // Move to the next node (which is actually in current.prev now)
+            current = current.prev;
+        }
+
+        // After the loop, temp points to the node before the old head.
+        // So temp.prev is the new head.
+        if (temp != null) {
+            tail = head; // Old head is now the tail
+            head = temp.prev; // New head is the last node visited
+        }
+    }
 }

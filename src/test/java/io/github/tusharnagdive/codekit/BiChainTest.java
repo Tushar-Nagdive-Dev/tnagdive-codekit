@@ -1,6 +1,7 @@
 package io.github.tusharnagdive.codekit;
 
 import io.github.tusharnagdive.codekit.kitcollection.bichain.BiChain;
+import io.github.tusharnagdive.codekit.model.Users;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,5 +108,23 @@ class BiChainTest {
         assertNotNull(intChain.findFromFirst(x -> x, 2));
         assertNull(intChain.findFromFirst(x -> x, 1));
         assertNull(intChain.findFromFirst(x -> x, 3));
+    }
+
+    @Test
+    void testGetMethod() {
+        BiChain<Users> userChain = BiChain.from(List.of(
+            new Users(1, "user1", "user1@mail.com", "username1"),
+            new Users(2, "user2", "user2@mail.com", "username2"),
+            new Users(4, "user4", "user4@mail.com", "username4"),
+            new Users(3, "user3", "user3@mail.com", "username3"),
+            new Users(4, "user5", "user5@mail.com", "username5"),
+            new Users(8, "user8", "user8@mail.com", "username8"),
+            new Users(7, "user7", "user7@mail.com", "username7"),
+            new Users(10, "user10", "user10@mail.com", "username10"),
+            new Users(9, "user9", "user9@mail.com", "username9"),
+            new Users(6, "user6", "user6@mail.com", "username6")
+        ));
+        Users result = userChain.get(Users::getUsername, "username8");
+        assertEquals("username8", result.getUsername());
     }
 }
