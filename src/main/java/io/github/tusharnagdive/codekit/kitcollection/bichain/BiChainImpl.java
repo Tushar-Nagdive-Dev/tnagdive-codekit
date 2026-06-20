@@ -1,19 +1,25 @@
 package io.github.tusharnagdive.codekit.kitcollection.bichain;
 
 import io.github.tusharnagdive.codekit.annotate.KitComponent;
+import io.github.tusharnagdive.codekit.kitcollection.utils.BiChainUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @KitComponent(singleton = false)
 final class BiChainImpl<T> implements BiChain<T> {
+
     public BiNode<T> head;
     public BiNode<T> tail;
     private int size = 0;
+
+    @Override
+    public Stream<T> stream() {
+        return BiChain.super.stream();
+    }
 
     @Override
     public int size() {
@@ -26,7 +32,6 @@ final class BiChainImpl<T> implements BiChain<T> {
         List<T> result = new ArrayList<>();
         BiNode<T> current = head;
         while(current != null) {
-            size++;
             result.add(current.data);
             current = current.next;
         }
@@ -362,7 +367,6 @@ final class BiChainImpl<T> implements BiChain<T> {
 
             if (Objects.equals(fieldValue, matchValue)) {
                 removeNode(current); // Use your existing O(1) delete logic
-                size--;
                 return; // Exit after removing the first match
             }
             current = current.next;
@@ -431,5 +435,78 @@ final class BiChainImpl<T> implements BiChain<T> {
             tail = head; // Old head is now the tail
             head = temp.prev; // New head is the last node visited
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void sort() {
+        sortBy(x -> (Comparable) x);
+    }
+
+    @Override
+    public <R extends Comparable<R>> void sortBy(Function<T, R> selector) {
+        if (head == null || head.next == null) return;
+
+        // Functional Merge Sort: Logic remains the same,
+        // using the selector to extract data for comparison.
+        this.head = BiChainUtils.mergeSort(head, selector);
+
+        // Re-sync tail pointer after reorganization
+        BiNode<T> current = head;
+        while (current.next != null) current = current.next;
+        this.tail = current;
+    }
+
+    @Override
+    public <R> void unique(Function<T, R> selector) {
+        if (head == null) return;
+
+        BiNode<T> current = head;
+        while (current != null && current.next != null) {
+            R val1 = selector.apply(current.data);
+            R val2 = selector.apply(current.next.data);
+
+            if (Objects.equals(val1, val2)) {
+                // Duplicate found: remove the next node using existing O(1) logic
+                removeNode(current.next);
+            } else {
+                current = current.next;
+            }
+        }
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private BiNode<T> current = head;
+
+            @Override
+            public boolean hasNext() {
+                return current != null;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) throw new NoSuchElementException();
+                T data = current.data;
+                current = current.next;
+                return data;
+            }
+        };
+    }
+
+    @Override
+    public void forEach(Consumer<? super T> action) {
+        Objects.requireNonNull(action);
+        BiNode<T> current = head;
+        while (current != null) {
+            action.accept(current.data);
+            current = current.next;
+        }
+    }
+
+    @Override
+    public Spliterator<T> spliterator() {
+        return Spliterators.spliterator(iterator(), size, Spliterator.ORDERED | Spliterator.SIZED);
     }
 }

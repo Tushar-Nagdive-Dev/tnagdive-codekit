@@ -3,6 +3,8 @@ package io.github.tusharnagdive.codekit.kitcollection.bichain;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A Zero-Invasive, high-performance Doubly Linked List implementation.
@@ -13,7 +15,14 @@ import java.util.function.Function;
  * </p>
  * * @param <T> The type of elements held in this collection.
  */
-public sealed interface BiChain<T> permits BiChainImpl {
+public sealed interface BiChain<T> extends Iterable<T> permits BiChainImpl {
+
+    /**
+     * Stream Support
+     * */
+    default Stream<T> stream() {
+        return StreamSupport.stream(spliterator(), false);
+    }
 
     /**
      * Creates a new, empty BiChain instance.
@@ -138,6 +147,15 @@ public sealed interface BiChain<T> permits BiChainImpl {
 
     /** Prints list backward from tail to head. */
     void biChainPrintBackward();
+
+    /** sorting the BiChain</>. */
+    <R extends Comparable<R>> void sortBy(Function<T, R> selector);
+
+    /** sort for wrapper objects like String, Integer etc the BiChain</>. */
+    void sort();
+
+    /** unique() Remove Duplicates. */
+    <R> void unique(Function<T, R> selector);
 
     T findFromLast(T value);
     <R> T findFromLast(Function<T, R> selector, R matchValue);
