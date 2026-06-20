@@ -65,7 +65,6 @@ class BiChainTest {
     void testUnique() {
         chain.addAtLast(new User(2, "Bob Duplicate"));
         // Sort first so duplicates are adjacent!
-//        chain.sortBy(User::getId);
         chain.unique(User::getId);
 
         assertEquals(3, chain.size());
