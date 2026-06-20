@@ -25,6 +25,13 @@ public sealed interface BiChain<T> extends Iterable<T> permits BiChainImpl {
     }
 
     /**
+     * Parallel Stream Support
+     * */
+    default Stream<T> parallelStream() {
+        return StreamSupport.stream(spliterator(), true);
+    }
+
+    /**
      * Creates a new, empty BiChain instance.
      * @param <T> The element type.
      * @return A new {@link BiChain}.

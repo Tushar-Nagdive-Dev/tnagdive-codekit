@@ -3,16 +3,21 @@ package io.github.tusharnagdive.codekit.kitcollection.unichain;
 import io.github.tusharnagdive.codekit.annotate.KitComponent;
 import io.github.tusharnagdive.codekit.kitcollection.utils.UniChainUtils;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @KitComponent(singleton = false)
 final class UniChainImpl<T> implements UniChain<T> {
 
     public UniNode<T> head;
+    private int size = 0;
+
+    @Override
+    public int size() {
+        return this.size;
+    }
 
     public UniChainImpl() {}
 
@@ -42,17 +47,6 @@ final class UniChainImpl<T> implements UniChain<T> {
     }
 
     @Override
-    public Integer length() {
-        Integer length = 0;
-        UniNode<T> current = head;
-        while (current != null) {
-            length++;
-            current = current.next;
-        }
-        return length;
-    }
-
-    @Override
     public void uniChainPrint() {
         UniNode<T> current = head;
         while (current != null) {
@@ -67,6 +61,7 @@ final class UniChainImpl<T> implements UniChain<T> {
         UniNode<T> newNode = new UniNode<>(data);
         newNode.next = head;
         head = newNode;
+        size++;
     }
 
     @Override
@@ -74,6 +69,7 @@ final class UniChainImpl<T> implements UniChain<T> {
         UniNode<T> newNode = new UniNode<>(data);
         if(this.head == null){
             head = newNode;
+            size++;
             return;
         }
         UniNode<T> current = head;
@@ -81,13 +77,13 @@ final class UniChainImpl<T> implements UniChain<T> {
             current = current.next;
         }
         current.next = newNode;
+        size++;
     }
 
     @Override
     public void insertAfter(T value, T data) {
         if(head == null) {
-            System.out.println("SL List is empty");
-            return;
+            throw new NullPointerException("UniChain is Empty");
         }
         UniNode<T> current = head;
         boolean isPresent = false;
@@ -97,12 +93,12 @@ final class UniChainImpl<T> implements UniChain<T> {
                 UniNode<T> newNode = new UniNode<>(data);
                 newNode.next = current.next;
                 current.next = newNode;
+                size++;
                 break;
             }
             current = current.next;
         }
         if(!isPresent) {
-            System.out.println("Provided value not present, data added at the end of the list");
             addAtLast(data);
         }
     }
@@ -110,8 +106,7 @@ final class UniChainImpl<T> implements UniChain<T> {
     @Override
     public void insertBefore(T value, T data) {
         if (head == null) {
-            System.out.println("SL List is empty");
-            return;
+            throw new NullPointerException("UniChain is Empty");
         }
         if (head.data.equals(value)) {
             addAtFirst(data);
@@ -125,12 +120,12 @@ final class UniChainImpl<T> implements UniChain<T> {
                 UniNode<T> newNode = new UniNode<>(data);
                 newNode.next = current.next;
                 current.next = newNode;
+                size++;
                 break;
             }
             current = current.next;
         }
         if (!isPresent) {
-            System.out.println("Provided value not present, data added at the end of the list");
             addAtLast(data);
         }
     }
@@ -142,8 +137,7 @@ final class UniChainImpl<T> implements UniChain<T> {
             return;
         }
         if (head == null) {
-            System.out.println("SL List is empty. Cannot insert at index " + targetIndex);
-            return;
+            throw new NullPointerException("UniChain is Empty");
         }
         UniNode<T> current = head;
         int index = 0;
@@ -152,31 +146,33 @@ final class UniChainImpl<T> implements UniChain<T> {
                 UniNode<T> newNode = new UniNode<>(value);
                 newNode.next = current.next;
                 current.next = newNode;
+                size++;
                 return;
             }
             current = current.next;
             index++;
         }
-        System.out.println("Error: Target index " + targetIndex + " is out of bounds.");
+        throw new NoSuchElementException("Target index " + targetIndex + " is out of bounds.");
     }
 
     @Override
     public void removeFirst() {
         if (head == null) {
-            System.out.println("SL List is already empty");
+            throw new NullPointerException("UniChain is Empty");
         } else {
             head = head.next;
+            size--;
         }
     }
 
     @Override
     public void removeLast() {
         if (head == null) {
-            System.out.println("SL List is already empty");
-            return;
+            throw new NullPointerException("UniChain is Empty");
         }
         if (head.next == null) {
             head = null;
+            size--;
             return;
         }
         UniNode<T> current = head;
@@ -184,22 +180,24 @@ final class UniChainImpl<T> implements UniChain<T> {
             current = current.next;
         }
         current.next = null;
+        size--;
     }
 
     @Override
     public void removeByValue(T value) {
         if (head == null) {
-            System.out.println("SL List is already empty");
-            return;
+            throw new NullPointerException("UniChain is Empty");
         }
         if (head.data.equals(value)) {
             head = head.next;
+            size--;
             return;
         }
         UniNode<T> current = head;
         while (current != null && current.next != null) {
             if (current.next.data.equals(value)) {
                 current.next = current.next.next;
+                size--;
                 break;
             }
             current = current.next;
@@ -209,11 +207,11 @@ final class UniChainImpl<T> implements UniChain<T> {
     @Override
     public void removeAtIndex(Integer targetIndex) {
         if (head == null) {
-            System.out.println("SL List is already empty");
-            return;
+            throw new NullPointerException("UniChain is Empty");
         }
         if(head != null && targetIndex.equals(0)) {
             head = head.next;
+            size--;
             return;
         }
         UniNode<T> current = head;
@@ -221,12 +219,13 @@ final class UniChainImpl<T> implements UniChain<T> {
         while (current != null) {
             if ((index + 1) == targetIndex) {
                 current.next = current.next.next;
+                size--;
                 return;
             }
             current = current.next;
             index++;
         }
-        System.out.println("Error: Target index " + targetIndex + " is out of bounds.");
+        throw new NoSuchElementException("Target index " + targetIndex + " is out of bounds.");
     }
 
     @Override
@@ -238,13 +237,14 @@ final class UniChainImpl<T> implements UniChain<T> {
             current.next = null;
             current = nextNode;
         }
+        size = 0;
         head = null;
-        System.out.println("List cleared sequentially.");
     }
 
     @Override
     public void clearInstantly() {
         head = null;
+        size = 0;
         System.out.println("List cleared instantly by the Garbage Collector.");
     }
 
@@ -352,17 +352,23 @@ final class UniChainImpl<T> implements UniChain<T> {
     }
 
     @Override
-    public void concatenate(UniChain<T> uniChain) {
-        if(uniChain == null || uniChain.getHead() == null) { return; }
-        if(this.head == null) {
-            this.head = uniChain.getHead();
-            return;
+    public void concatenate(UniChain<T> other) {
+        if (other == null || other.getHead() == null) return;
+
+        // Cast to implementation to access internal size/nodes
+        UniChainImpl<T> otherImpl = (UniChainImpl<T>) other;
+
+        if (this.head == null) {
+            this.head = otherImpl.head;
+        } else {
+            UniNode<T> current = head;
+            while (current.next != null) current = current.next;
+            current.next = otherImpl.head;
         }
-        UniNode<T> current = head;
-        while (current.next != null) {
-            current = current.next;
-        }
-        current.next = uniChain.getHead();
+
+        // Sync size and invalidate the source to protect data integrity
+        this.size += otherImpl.size();
+        otherImpl.clearInstantly();
     }
 
     @Override
@@ -397,6 +403,7 @@ final class UniChainImpl<T> implements UniChain<T> {
             if (seen.contains(key)) {
                 // Duplicate found: link previous to the one after current
                 prev.next = current.next;
+                size--;
             } else {
                 // New item: track it and move prev forward
                 seen.add(key);
@@ -484,5 +491,50 @@ final class UniChainImpl<T> implements UniChain<T> {
     public <U extends Comparable<? super U>> void enhancedSort(Function<? super T, ? extends U> keyExtractor) {
         Comparator<T> secretComparator = Comparator.comparing(keyExtractor);
         this.head = UniChainUtils.mergeSort(this.head, secretComparator);
+    }
+
+    private boolean verifySize() {
+        int count = 0;
+        UniNode<T> current = head;
+        while (current != null) {
+            count++;
+            current = current.next;
+        }
+        return count == this.size;
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private UniNode<T> current = head;
+
+            @Override
+            public boolean hasNext() {
+                return current != null;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) throw new NoSuchElementException();
+                T data = current.data;
+                current = current.next;
+                return data;
+            }
+        };
+    }
+
+    @Override
+    public void forEach(Consumer<? super T> action) {
+        Objects.requireNonNull(action);
+        UniNode<T> current = head;
+        while (current != null) {
+            action.accept(current.data);
+            current = current.next;
+        }
+    }
+
+    @Override
+    public Spliterator<T> spliterator() {
+        return Spliterators.spliterator(iterator(), size, Spliterator.ORDERED | Spliterator.SIZED);
     }
 }

@@ -17,11 +17,6 @@ final class BiChainImpl<T> implements BiChain<T> {
     private int size = 0;
 
     @Override
-    public Stream<T> stream() {
-        return BiChain.super.stream();
-    }
-
-    @Override
     public int size() {
         return this.size;
     }

@@ -22,11 +22,11 @@ public class UniChainImplTest {
 
     @Test
     void testAddAtFirstAndLength() {
-        assertEquals(0, uniChain.length());
+        assertEquals(0, uniChain.size());
         uniChain.addAtFirst(10);
         uniChain.addAtFirst(20);
 
-        assertEquals(2, uniChain.length());
+        assertEquals(2, uniChain.size());
         assertEquals(20, uniChain.getHead().data);
     }
 
@@ -35,7 +35,7 @@ public class UniChainImplTest {
         uniChain.addAtLast(10);
         uniChain.addAtLast(20);
 
-        assertEquals(2, uniChain.length());
+        assertEquals(2, uniChain.size());
         assertEquals(10, uniChain.getHead().data);
         assertEquals(20, uniChain.getHead().next.data);
     }
@@ -46,7 +46,7 @@ public class UniChainImplTest {
         uniChain.addAtLast(30);
         uniChain.insertAfter(10, 20); // Insert 20 after 10
 
-        assertEquals(3, uniChain.length());
+        assertEquals(3, uniChain.size());
         assertEquals(20, uniChain.getHead().next.data);
     }
 
@@ -56,7 +56,7 @@ public class UniChainImplTest {
         uniChain.addAtLast(30);
         uniChain.insertBefore(30, 20); // Insert 20 before 30
 
-        assertEquals(3, uniChain.length());
+        assertEquals(3, uniChain.size());
         assertEquals(20, uniChain.getHead().next.data);
     }
 
@@ -66,7 +66,7 @@ public class UniChainImplTest {
         uniChain.addAtLast(30);
         uniChain.insertAtIndex(20, 1); // Insert 20 at index 1
 
-        assertEquals(3, uniChain.length());
+        assertEquals(3, uniChain.size());
         assertEquals(20, uniChain.getHead().next.data);
     }
 
@@ -78,7 +78,7 @@ public class UniChainImplTest {
         uniChain.addAtLast(20);
         uniChain.removeFirst();
 
-        assertEquals(1, uniChain.length());
+        assertEquals(1, uniChain.size());
         assertEquals(20, uniChain.getHead().data);
     }
 
@@ -89,7 +89,7 @@ public class UniChainImplTest {
         uniChain.addAtLast(30);
         uniChain.removeLast();
 
-        assertEquals(2, uniChain.length());
+        assertEquals(2, uniChain.size());
         assertNull(uniChain.getHead().next.next);
     }
 
@@ -100,7 +100,7 @@ public class UniChainImplTest {
         uniChain.addAtLast(30);
         uniChain.removeByValue(20);
 
-        assertEquals(2, uniChain.length());
+        assertEquals(2, uniChain.size());
         assertEquals(30, uniChain.getHead().next.data);
     }
 
@@ -111,7 +111,7 @@ public class UniChainImplTest {
         uniChain.addAtLast(30);
         uniChain.removeAtIndex(1); // Removes 20
 
-        assertEquals(2, uniChain.length());
+        assertEquals(2, uniChain.size());
         assertEquals(30, uniChain.getHead().next.data);
     }
 
@@ -124,7 +124,7 @@ public class UniChainImplTest {
         uniChain.clearSequentially();
 
         assertNull(uniChain.getHead());
-        assertEquals(0, uniChain.length());
+        assertEquals(0, uniChain.size());
     }
 
     @Test
@@ -134,7 +134,7 @@ public class UniChainImplTest {
         uniChain.clearInstantly();
 
         assertNull(uniChain.getHead());
-        assertEquals(0, uniChain.length());
+        assertEquals(0, uniChain.size());
     }
 
     // --- 5. Retrieval & Update Tests ---
@@ -212,7 +212,7 @@ public class UniChainImplTest {
 
         uniChain.concatenate(uniChain2);
 
-        assertEquals(4, uniChain.length());
+        assertEquals(4, uniChain.size());
         assertEquals(3, uniChain.getHead().next.next.data);
     }
 
@@ -250,7 +250,7 @@ public class UniChainImplTest {
         uniChainString.addAtFirst("str3");
         uniChainString.removeDuplicates();
 
-        assertEquals(4, uniChainString.length());
+        assertEquals(4, uniChainString.size());
     }
 
     @Test

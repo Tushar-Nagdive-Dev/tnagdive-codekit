@@ -1,6 +1,8 @@
 package io.github.tusharnagdive.codekit.kitcollection.unichain;
 
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * The core interface for the UniChain framework.
@@ -8,7 +10,21 @@ import java.util.function.Function;
  *
  * @param <T> The type of objects contained in the chain.
  */
-public sealed interface UniChain<T> permits UniChainImpl{
+public sealed interface UniChain<T> extends Iterable<T> permits UniChainImpl{
+
+    /**
+     * Stream Support
+     * */
+    default Stream<T> stream() {
+        return StreamSupport.stream(spliterator(), false);
+    }
+
+    /**
+     * Parallel Stream Support
+     * */
+    default Stream<T> parallelStream() {
+        return StreamSupport.stream(spliterator(), true);
+    }
 
     /**
      * Creates a new instance of UniChain.
@@ -19,7 +35,7 @@ public sealed interface UniChain<T> permits UniChainImpl{
     }
 
     /** @return The current size of the chain. */
-    Integer length();
+    int size();
 
     /** @return The head node of the chain. */
     UniNode<T> getHead();
