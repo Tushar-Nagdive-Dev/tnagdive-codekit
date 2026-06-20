@@ -1,16 +1,17 @@
 package io.github.tusharnagdive.codekit.kitcollection.bichain;
 
 import io.github.tusharnagdive.codekit.annotate.KitComponent;
+import io.github.tusharnagdive.codekit.kitcollection.utils.BiChainUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @KitComponent(singleton = false)
 final class BiChainImpl<T> implements BiChain<T> {
+
     public BiNode<T> head;
     public BiNode<T> tail;
     private int size = 0;
@@ -26,7 +27,6 @@ final class BiChainImpl<T> implements BiChain<T> {
         List<T> result = new ArrayList<>();
         BiNode<T> current = head;
         while(current != null) {
-            size++;
             result.add(current.data);
             current = current.next;
         }
@@ -362,7 +362,6 @@ final class BiChainImpl<T> implements BiChain<T> {
 
             if (Objects.equals(fieldValue, matchValue)) {
                 removeNode(current); // Use your existing O(1) delete logic
-                size--;
                 return; // Exit after removing the first match
             }
             current = current.next;
@@ -431,5 +430,109 @@ final class BiChainImpl<T> implements BiChain<T> {
             tail = head; // Old head is now the tail
             head = temp.prev; // New head is the last node visited
         }
+    }
+
+    @Override
+    public void concatenate(BiChain<T> other) {
+        if (other == null || ((BiChainImpl<T>) other).head == null) return;
+
+        BiChainImpl<T> otherImpl = (BiChainImpl<T>) other;
+
+        if (this.head == null) {
+            this.head = otherImpl.head;
+            this.tail = otherImpl.tail;
+        } else {
+            // Link our current tail to their head
+            this.tail.next = otherImpl.head;
+            // Link their head back to our tail
+            otherImpl.head.prev = this.tail;
+            // Update our tail reference to their tail
+            this.tail = otherImpl.tail;
+        }
+
+        // Update size
+        this.size += otherImpl.size();
+
+        // Invalidate the source to prevent state corruption
+        otherImpl.head = null;
+        otherImpl.tail = null;
+        otherImpl.size = 0;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void sort() {
+        sortBy(x -> (Comparable) x);
+    }
+
+    @Override
+    public <R extends Comparable<R>> void sortBy(Function<T, R> selector) {
+        if (head == null || head.next == null) return;
+
+        // Functional Merge Sort: Logic remains the same,
+        // using the selector to extract data for comparison.
+        this.head = BiChainUtils.mergeSort(head, selector);
+
+        // Re-sync tail pointer after reorganization
+        BiNode<T> current = head;
+        while (current.next != null) current = current.next;
+        this.tail = current;
+    }
+
+    @Override
+    public <R> void unique(Function<T, R> selector) {
+        if (head == null) return;
+
+        Set<R> seen = new HashSet<>();
+        BiNode<T> current = head;
+
+        while (current != null) {
+            R key = selector.apply(current.data);
+
+            if (seen.contains(key)) {
+                // Duplicate found: removeNode handles size--
+                BiNode<T> nextNode = current.next;
+                removeNode(current);
+                current = nextNode;
+            } else {
+                seen.add(key);
+                current = current.next;
+            }
+        }
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private BiNode<T> current = head;
+
+            @Override
+            public boolean hasNext() {
+                return current != null;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) throw new NoSuchElementException();
+                T data = current.data;
+                current = current.next;
+                return data;
+            }
+        };
+    }
+
+    @Override
+    public void forEach(Consumer<? super T> action) {
+        Objects.requireNonNull(action);
+        BiNode<T> current = head;
+        while (current != null) {
+            action.accept(current.data);
+            current = current.next;
+        }
+    }
+
+    @Override
+    public Spliterator<T> spliterator() {
+        return Spliterators.spliterator(iterator(), size, Spliterator.ORDERED | Spliterator.SIZED);
     }
 }
