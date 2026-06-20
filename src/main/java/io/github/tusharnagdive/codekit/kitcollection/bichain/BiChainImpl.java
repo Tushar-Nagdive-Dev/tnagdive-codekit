@@ -433,6 +433,33 @@ final class BiChainImpl<T> implements BiChain<T> {
     }
 
     @Override
+    public void concatenate(BiChain<T> other) {
+        if (other == null || ((BiChainImpl<T>) other).head == null) return;
+
+        BiChainImpl<T> otherImpl = (BiChainImpl<T>) other;
+
+        if (this.head == null) {
+            this.head = otherImpl.head;
+            this.tail = otherImpl.tail;
+        } else {
+            // Link our current tail to their head
+            this.tail.next = otherImpl.head;
+            // Link their head back to our tail
+            otherImpl.head.prev = this.tail;
+            // Update our tail reference to their tail
+            this.tail = otherImpl.tail;
+        }
+
+        // Update size
+        this.size += otherImpl.size();
+
+        // Invalidate the source to prevent state corruption
+        otherImpl.head = null;
+        otherImpl.tail = null;
+        otherImpl.size = 0;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void sort() {
         sortBy(x -> (Comparable) x);
@@ -456,15 +483,19 @@ final class BiChainImpl<T> implements BiChain<T> {
     public <R> void unique(Function<T, R> selector) {
         if (head == null) return;
 
+        Set<R> seen = new HashSet<>();
         BiNode<T> current = head;
-        while (current != null && current.next != null) {
-            R val1 = selector.apply(current.data);
-            R val2 = selector.apply(current.next.data);
 
-            if (Objects.equals(val1, val2)) {
-                // Duplicate found: remove the next node using existing O(1) logic
-                removeNode(current.next);
+        while (current != null) {
+            R key = selector.apply(current.data);
+
+            if (seen.contains(key)) {
+                // Duplicate found: removeNode handles size--
+                BiNode<T> nextNode = current.next;
+                removeNode(current);
+                current = nextNode;
             } else {
+                seen.add(key);
                 current = current.next;
             }
         }

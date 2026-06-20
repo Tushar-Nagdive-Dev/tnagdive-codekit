@@ -161,6 +161,9 @@ public sealed interface BiChain<T> extends Iterable<T> permits BiChainImpl {
     /** sort for wrapper objects like String, Integer etc the BiChain</>. */
     void sort();
 
+    /** concatenate other BiChain</>. */
+    void concatenate(BiChain<T> other);
+
     /** unique() Remove Duplicates. */
     <R> void unique(Function<T, R> selector);
 
